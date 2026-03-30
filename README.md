@@ -37,6 +37,11 @@ The Python stack provides specific <b>tools, rules and best practices</b> for ea
 └── README.md                      # This file
 ```
 
+## Direct links
+
+* Document [luxus-python-stack.md](luxuspythonstack/references/luxus-python-stack.md)
+* Document [daily-commands.md](luxuspythonstack/references/daily-commands.md)
+* Script [pyinit.sh](luxuspythonstack/scripts/pyinit.sh)
 
 ## Installation
 
