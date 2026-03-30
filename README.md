@@ -22,7 +22,7 @@ This is my personal Python stack that I use for <b>project development, data sci
 The Python stack provides specific <b>tools, rules and best practices</b> for each level. The complete stack is contained in the documents <b>luxus-python-stack.md</b> and <b>daily-commands.md</b> and are located in the <b>reference</b> directory of the <b>agent skill</b>.
 
 
-## Inhalt des Repositories
+## Content
 
 
 ```
