@@ -15,8 +15,10 @@
 #   - .vscode/settings.json with Ruff formatter
 #   - .envrc for direnv auto-activation
 #   - .gitignore from gitignore.io (Python + Linux + VSCode)
-#   - Dev dependencies: ruff pytest mypy colorlog bump-my-version
+#   - Dev dependencies: ruff pytest basedpyright colorlog bump-my-version just pre-commit
 #   - Git repository (if not already initialized)
+#   - Justfile for task running
+#   - .pre-commit-config.yaml for local quality checks
 
 set -euo pipefail
 
@@ -46,14 +48,14 @@ export UV_PYTHON_PREFERENCE=only-managed
 uv init "$_type" --python 3.12
 
 # ─── Step 3: Add dev dependencies ─────────────────────────────────────────────
-uv add --dev ruff pytest mypy colorlog bump-my-version
+uv add --dev ruff pytest basedpyright colorlog bump-my-version just pre-commit
 
 # ─── Step 4: VS Code configuration ────────────────────────────────────────────
 mkdir -p .vscode
 cat > .vscode/settings.json << 'VSCODE_EOF'
 {
     "python.defaultInterpreterPath": ".venv/bin/python",
-    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.typeCheckingMode": "standard",
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
@@ -110,8 +112,62 @@ ignored.txt
 # end of 'Luxurious Python Stack'
 GITIGNORE_EOF
 
-# ─── Step 8: Final sync ───────────────────────────────────────────────────────
+# ─── Step 8: Justfile setup ───────────────────────────────────────────────────
+cat > Justfile << 'JUST_EOF'
+set shell := ["bash", "-uc"]
+
+# Run the project
+run:
+uv run python src/$(basename "$PWD" | tr '-' '_')/main.py
+
+# Run tests
+test:
+uv run pytest
+
+# Run linters and formatters
+lint:
+uv run ruff check .
+uv run ruff format --check .
+uv run basedpyright
+
+# Fix linting issues
+fix:
+uv run ruff check --fix .
+uv run ruff format .
+
+# Bump version (patch, minor, major)
+bump part="patch":
+uv run bump-my-version {{part}}
+JUST_EOF
+
+# ─── Step 9: pre-commit setup ─────────────────────────────────────────────────
+cat > .pre-commit-config.yaml << 'PRECOMMIT_EOF'
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      - id: basedpyright
+        name: basedpyright
+        entry: uv run basedpyright
+        language: system
+        types_or: [python, pyi]
+        pass_filenames: false
+PRECOMMIT_EOF
+
+# ─── Step 10: Final sync & install hooks ──────────────────────────────────────
 uv sync
+uv run pre-commit install
 
 echo ""
 echo -e "\e[32m✨ Success! Project '${PROJECT_NAME}' is ready.\e[0m"
@@ -119,10 +175,10 @@ echo ""
 echo "  Next steps:"
 echo "  1. direnv allow   (if not yet activated)"
 echo "  2. Start coding in src/${PROJECT_NAME//-/_}/"
-echo "  3. Run tests with: pytest"
-echo "  4. Lint with:      ruff check ."
-echo "  5. Type check:     mypy src/"
+echo "  3. Run tests with: just test"
+echo "  4. Lint with:      just lint"
+echo "  5. Auto-fix:       just fix"
 echo ""
 echo "  To release:"
-echo "  uv run bump-my-version patch"
+echo "  just bump patch"
 echo "  git push origin main --tags"

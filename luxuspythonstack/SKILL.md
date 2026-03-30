@@ -1,6 +1,6 @@
 ---
 name: "luxus-python-stack"
-description: "Expert coding agent for the Luxurious Python Stack — a five-level Python development system using Mamba, UV, direnv, Ruff, MyPy, bump-my-version, and GitHub Actions. Use this skill whenever working on Python projects that use uv, mamba, or direnv; when initializing new Python projects with pyinit; when managing virtual environments (.venv) or conda environments; when running Ruff linting, MyPy type checking, or pytest; when bumping versions or releasing packages with bump-my-version; when setting up CI/CD pipelines for Python; when working with AGENTS.md or SESSION.md in a project repository; or when the user asks about the five-level Python stack concept (System, Data Science, Project, CI/Deployment, AI Agents)."
+description: "Expert coding agent for the Luxurious Python Stack — a five-level Python development system using Mamba, UV, direnv, Ruff, basedpyright, just, pre-commit, bump-my-version, and GitHub Actions. Use this skill whenever working on Python projects that use uv, mamba, or direnv; when initializing new Python projects with pyinit; when managing virtual environments (.venv) or conda environments; when running Ruff linting, basedpyright type checking, or pytest; when bumping versions or releasing packages with bump-my-version; when setting up CI/CD pipelines for Python; when working with AGENTS.md or SESSION.md in a project repository; or when the user asks about the five-level Python stack concept (System, Data Science, Project, CI/Deployment, AI Agents)."
 ---
 
 # Luxurious Python Stack
@@ -40,7 +40,7 @@ Need to run code?
   → In scripts/CI:            uv run python src/...  (guaranteed sync)
 
 Need to release?
-  → uv run bump-my-version [patch|minor|major]
+  → just bump [patch|minor|major]
   → git push origin main --tags
 ```
 
@@ -69,7 +69,9 @@ The script creates:
 - `.envrc` for direnv auto-activation
 - `.gitignore` (from gitignore.io)
 - `bump-my-version` config in `pyproject.toml`
-- Dev dependencies: `ruff pytest mypy colorlog bump-my-version`
+- Dev dependencies: `ruff pytest basedpyright colorlog bump-my-version just pre-commit`
+- `Justfile` for task running
+- `.pre-commit-config.yaml` for local quality checks
 
 After running pyinit, activate the environment:
 ```bash
@@ -114,16 +116,14 @@ uv sync                   # sync environment with lock file
 
 **Run code**:
 ```bash
-python src/my_project/main.py    # with direnv active
-uv run python src/...            # guaranteed sync (use in scripts/CI)
-pytest                           # run tests
+just run                         # run the main script
+just test                        # run tests
 ```
 
 **Code quality**:
 ```bash
-ruff check .              # lint: find errors
-ruff check --fix .        # lint: auto-fix
-mypy src/                 # type checking
+just lint                 # lint: find errors (ruff + basedpyright)
+just fix                  # lint: auto-fix (ruff)
 ```
 
 ### 4. Release & Deployment
@@ -132,13 +132,13 @@ mypy src/                 # type checking
 
 ```bash
 # Patch release (bugfixes): 0.2.0 → 0.2.1
-uv run bump-my-version patch
+just bump patch
 
 # Minor release (features): 0.2.1 → 0.3.0
-uv run bump-my-version minor
+just bump minor
 
 # Major release (breaking): 0.3.0 → 1.0.0
-uv run bump-my-version major
+just bump major
 
 # Push code AND tags
 git push origin main --tags
@@ -173,8 +173,8 @@ Every repository using this stack includes two special files:
 
 **Session end workflow**:
 1. Write/update `SESSION.md` with session summary
-2. Commit all changes
-3. Run quality checks: `ruff check .` and `mypy src/`
+2. Commit all changes (pre-commit hooks will run automatically)
+3. Run quality checks manually if needed: `just lint`
 
 ## Key Shell Functions
 

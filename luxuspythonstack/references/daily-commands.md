@@ -19,7 +19,7 @@ bash scripts/pyinit.sh <project-name> --lib
 # Alternative: manual uv init
 export UV_PYTHON_PREFERENCE=only-managed
 uv init --app --python 3.12    # or --lib
-uv add --dev ruff pytest mypy colorlog bump-my-version
+uv add --dev ruff pytest basedpyright colorlog bump-my-version just pre-commit
 echo "source .venv/bin/activate" > .envrc && direnv allow
 ```
 
@@ -66,7 +66,7 @@ uv pip install <package>      # install directly (Level 1 / Level 3 only)
 ## Running Code
 
 ```bash
-python src/<project>/main.py        # direct (with direnv active)
+just run                            # run the main script
 uv run python src/<project>/main.py # guaranteed sync (use in scripts/CI)
 uv run <tool> <args>                # run tool from project environment
 ```
@@ -76,7 +76,7 @@ uv run <tool> <args>                # run tool from project environment
 ## Testing
 
 ```bash
-pytest                      # run all tests
+just test                   # run all tests
 pytest tests/               # run specific directory
 pytest -v                   # verbose output
 pytest -k "test_name"       # run specific test
@@ -89,15 +89,14 @@ uv run pytest               # guaranteed sync (CI/CD)
 ## Code Quality
 
 ```bash
+just lint                   # lint: show errors (ruff + basedpyright)
+just fix                    # lint: auto-fix what's possible (ruff)
+
+# Manual commands:
 ruff check .                # lint: show errors
 ruff check --fix .          # lint: auto-fix what's possible
 ruff format .               # format code
-
-mypy src/                   # type checking
-mypy --strict src/          # strict type checking
-
-# All in one (recommended before commit):
-ruff check --fix . && mypy src/ && pytest
+basedpyright                # type checking
 ```
 
 ---
@@ -106,9 +105,9 @@ ruff check --fix . && mypy src/ && pytest
 
 ```bash
 # ALWAYS use bump-my-version (never edit manually, never git tag manually)
-uv run bump-my-version patch    # 0.2.0 → 0.2.1  (bugfixes)
-uv run bump-my-version minor    # 0.2.1 → 0.3.0  (new features)
-uv run bump-my-version major    # 0.3.0 → 1.0.0  (breaking changes)
+just bump patch                 # 0.2.0 → 0.2.1  (bugfixes)
+just bump minor                 # 0.2.1 → 0.3.0  (new features)
+just bump major                 # 0.3.0 → 1.0.0  (breaking changes)
 
 # Push code AND tags together
 git push origin main --tags
@@ -125,9 +124,8 @@ uv publish      # upload to PyPI
 ```bash
 # In GitHub Actions workflows:
 uv sync                     # install all dependencies (uses uv.lock)
-uv run ruff check .         # lint
-uv run mypy src/            # type check
-uv run pytest               # run tests
+just lint                   # lint and type check
+just test                   # run tests
 uv build && uv publish      # build and publish (release workflow)
 
 # Trigger release via workflow_dispatch in GitHub:
@@ -142,12 +140,12 @@ uv build && uv publish      # build and publish (release workflow)
 # Feature development
 git checkout -b feature/my-feature
 # ... make changes ...
-ruff check --fix . && mypy src/ && pytest
-git add -A && git commit -m "feat: description"
+just lint && just test
+git add -A && git commit -m "feat: description" # pre-commit hooks will run
 git push origin feature/my-feature
 
 # Release
-uv run bump-my-version patch
+just bump patch
 git push origin main --tags
 
 # After git pull
@@ -191,13 +189,13 @@ git log --oneline -5
 ### Session End
 ```bash
 # 1. Run quality checks
-ruff check --fix . && mypy src/ && pytest
+just lint && just test
 
 # 2. Commit all changes
-git add -A && git commit -m "chore: end of session"
+git add -A && git commit -m "chore: end of session" # pre-commit hooks will run
 
 # 3. Update SESSION.md with summary
-cat > SESSION.md << 'EOF'
+cat > SESSION.md << 'SESSION_EOF'
 # Session Summary — $(date +%Y-%m-%d)
 
 ## What was accomplished
@@ -208,7 +206,7 @@ cat > SESSION.md << 'EOF'
 
 ## Next steps
 - ...
-EOF
+SESSION_EOF
 
 git add SESSION.md   # SESSION.md is in .gitignore, this won't commit it
 ```
@@ -232,7 +230,7 @@ cw            # cd to saved working folder
 | Wrong Python version in project | `uv python pin 3.12` |
 | direnv not activating | `direnv allow` |
 | Mamba env conflicts | `mamba clean --all` or recreate env |
-| Type errors | Check `mypy src/` output |
-| Lint errors | `ruff check --fix .` |
+| Type errors | Check `basedpyright` output |
+| Lint errors | `just fix` |
 | bump-my-version fails | Ensure clean git state (`git status`) |
 | Can't publish to PyPI | Check `uv publish --token <token>` |
