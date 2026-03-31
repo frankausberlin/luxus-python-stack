@@ -31,7 +31,7 @@ bash scripts/pyinit.sh <project-name> --lib
 export UV_PYTHON_PREFERENCE=only-managed
 uv init --app --python 3.12    # or --lib
 echo "3.12" > .python-version
-uv add --dev ruff pytest basedpyright colorlog bump-my-version pre-commit
+uv add --dev ruff pytest pytest-cov basedpyright colorlog bump-my-version pre-commit
 echo "source .venv/bin/activate" > .envrc && direnv allow
 ```
 

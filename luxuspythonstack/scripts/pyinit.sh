@@ -17,7 +17,7 @@
 #   - .vscode/launch.json for debugging
 #   - .envrc for direnv auto-activation
 #   - .gitignore from gitignore.io (Python + Linux + VSCode)
-#   - Dev dependencies: ruff pytest basedpyright colorlog bump-my-version pre-commit
+#   - Dev dependencies: ruff pytest pytest-cov basedpyright colorlog bump-my-version pre-commit
 #   - Git repository (if not already initialized)
 #   - Justfile for task running
 #   - .pre-commit-config.yaml for local quality checks
@@ -51,7 +51,7 @@ export UV_PYTHON_PREFERENCE=only-managed
 uv init "$_type" --python 3.12
 
 # ─── Step 3: Add dev dependencies ─────────────────────────────────────────────
-uv add --dev ruff pytest basedpyright colorlog bump-my-version pre-commit
+uv add --dev ruff pytest pytest-cov basedpyright colorlog bump-my-version pre-commit
 
 # ─── Step 4: VS Code configuration ────────────────────────────────────────────
 mkdir -p .vscode
@@ -168,9 +168,9 @@ set shell := ["bash", "-uc"]
 run:
     uv run python src/$(basename "$PWD" | tr '-' '_')/main.py
 
-# Run tests
+# Run tests with coverage report
 test:
-    uv run pytest
+    uv run pytest --cov=src --cov-report=term-missing
 
 # Run linters and type checker (find errors)
 lint:
@@ -187,7 +187,7 @@ check:
     uv run ruff check .
     uv run ruff format --check .
     uv run basedpyright
-    uv run pytest
+    uv run pytest --cov=src --cov-report=term-missing
 
 # Fix linting issues
 fix:
@@ -202,9 +202,9 @@ else
 cat > Justfile << 'JUST_EOF'
 set shell := ["bash", "-uc"]
 
-# Run tests
+# Run tests with coverage report
 test:
-    uv run pytest
+    uv run pytest --cov=src --cov-report=term-missing
 
 # Run linters and type checker (find errors)
 lint:
@@ -221,7 +221,7 @@ check:
     uv run ruff check .
     uv run ruff format --check .
     uv run basedpyright
-    uv run pytest
+    uv run pytest --cov=src --cov-report=term-missing
 
 # Fix linting issues
 fix:

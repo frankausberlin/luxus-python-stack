@@ -70,7 +70,7 @@ The script creates:
 - `.envrc` for direnv auto-activation
 - `.gitignore` (from gitignore.io)
 - `bump-my-version` config in `pyproject.toml`
-- Dev dependencies: `ruff pytest basedpyright colorlog bump-my-version pre-commit`
+- Dev dependencies: `ruff pytest pytest-cov basedpyright colorlog bump-my-version pre-commit`
 - `Justfile` for task running
 - `.pre-commit-config.yaml` for local quality checks
 
@@ -118,7 +118,7 @@ uv sync                   # sync environment with lock file
 **Run code**:
 ```bash
 just run                         # run the main script
-just test                        # run tests
+just test                        # run tests with coverage report (--cov=src)
 ```
 
 **Code quality**:
