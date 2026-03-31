@@ -19,7 +19,7 @@ This is my personal Python stack that I use for <b>project development, data sci
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🧱 Level 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>AI Agents <br> Vibe Coding
 </td></tr><tr><td colspan=5><hr></td></tr></table>
 
-The Python stack provides specific <b>tools, rules and best practices</b> for each level. The complete stack is contained in the documents <b>luxus-python-stack.md</b> and <b>daily-commands.md</b> and are located in the <b>reference</b> directory of the <b>agent skill</b>.
+The Python stack provides specific <b>tools, rules and best practices</b> for each level. The complete stack is contained in the documents <b>luxus-python-stack.md</b> and <b>daily-commands.md</b> and is located in the <b>references</b> directory of the <b>agent skill</b>.
 
 
 ## Content
@@ -51,4 +51,4 @@ The canonical bootstrap implementation lives in [pyinit.sh](luxuspythonstack/scr
 
 ## Installation
 
-To use the agent skill in an agent you <b>simply have to copy</b> the luxurypythonstack/ folder <b>into the agent's skill folder</b> (e.g.: ~/.claude/skills, ~/.opencode/skills, ~/.kilocode/skills).
+To use the agent skill in an agent you <b>simply have to copy</b> the luxuspythonstack/ folder <b>into the agent's skill folder</b> (e.g.: ~/.claude/skills, ~/.opencode/skills, ~/.kilocode/skills).

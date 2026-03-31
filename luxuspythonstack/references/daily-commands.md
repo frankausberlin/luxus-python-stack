@@ -11,7 +11,7 @@ bash scripts/install_luxuspythonstack.sh
 source ~/.bashrc
 ```
 
-The installer bootstraps the global tools, sources `scripts/.bash_lib_luxuspythonstack` from `~/.bashrc`, restores the saved Mamba environment from `~/.startenv`, and enables the `direnv` bash hook.
+The installer bootstraps the global tools, writes an absolute `source` path for `.bash_lib_luxuspythonstack` into `~/.bashrc`, restores the saved Mamba environment from `~/.startenv`, and enables the `direnv` bash hook.
 
 ---
 
@@ -45,6 +45,8 @@ act <envname>                        # activate + save to ~/.startenv
 mamba activate <envname>             # activate without saving
 mamba deactivate                     # deactivate
 mamba activate base                  # back to base
+jl [folder]                          # start Jupyter Lab without token
+jl -x [folder]                       # start Jupyter Lab with token enabled
 
 # Recreate environment
 py=3.12 && ENV_NAME="ds${py: -2}"

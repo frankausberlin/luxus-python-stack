@@ -175,9 +175,9 @@ Every repository using this stack includes two special files:
 4. Begin work
 
 **Session end workflow**:
-1. Write/update `SESSION.md` with session summary
-2. Commit all changes (pre-commit hooks will run automatically)
-3. Run the local quality gate: `just check`
+1. Run the local quality gate: `just check`
+2. Write/update `SESSION.md` with session summary
+3. Commit all changes (pre-commit hooks will run automatically)
 
 ## Key Shell Functions
 
@@ -187,6 +187,7 @@ These are bash functions defined in `.bashrc` — use them as commands:
 |----------|-------|-------------|
 | `pyinit` | `pyinit [name] [--lib]` | Create a new Python project |
 | `act` | `act <envname>` | Activate Mamba env + save to `.startenv` |
+| `jl` | `jl [-x] [folder]` | Start Jupyter Lab with optional token-enabled mode |
 | `cw` | `cw` / `cw .` | Jump to / set working folder |
 | `pypurge` | `pypurge` | Clean pip cache + Mamba environment |
 

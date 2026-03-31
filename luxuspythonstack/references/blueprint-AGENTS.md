@@ -19,11 +19,11 @@ This project is strictly managed by `uv`. **Do not use `pip`, `poetry`, or stand
    - Add packages: `uv add <package>`
    - Add dev tools: `uv add --dev <package>`
    - Sync environment: `uv sync`
-2. **Execution:** ALWAYS prefix commands with `uv run` to guarantee reproducibility (e.g., `uv run ruff check .`).
+2. **Execution:** In scripts, automation, and CI, ALWAYS prefix commands with `uv run` to guarantee reproducibility (e.g., `uv run ruff check .`). In an interactive terminal with `direnv`-activated `.venv`, direct commands are acceptable.
 3. **Quality Gate:** 
-    - Linting & Formatting: `uv run ruff check .` and `uv run ruff check --fix .`
-    - Type Checking: `uv run basedpyright`
-    - Testing: `uv run pytest`
+     - Linting & Formatting: `uv run ruff check .` and `uv run ruff check --fix .`
+     - Type Checking: `uv run basedpyright`
+     - Testing: `uv run pytest`
     - Unified gate: `just check`
 
 ## 🚀 Versioning & Releases

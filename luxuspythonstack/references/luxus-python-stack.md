@@ -31,7 +31,7 @@ Scripts and Aliases (.bash_lib_luxuspythonstack):
 - **act**: Activates a Mamba environment and saves it in the file ~/.startenv.
 - **pyinit**: Creates a Python project with all files and folders (src, tests, pyproject.toml, etc.) and initializes a UV environment.
 - **pypurge**: An alias for purging the pip cache and cleaning the Mamba environment.
-- **jl**: Starts Jupyter Lab in a default folder or optional in a specified folder.
+- **jl**: Starts Jupyter Lab in a default folder or optional in a specified folder. Use `jl -x [<folder>]` to keep the default Jupyter token enabled.
 
 
 ### Five-level concept
@@ -41,8 +41,9 @@ My workflow is based on a five-level concept:
 0. **Global / System Level**
 
 * The standard Python is available here (/usr/bin/python).
-* Important tools such as git, rg, fd and the build essentials are installed.
-* UV, direnv, just, ruff, basedpyright and Mamba are also installed but not set up.
+* Core bootstrap tools such as python3, git, curl and direnv are installed by the installer.
+* Miniforge/Mamba, UV, just, ruff and basedpyright are then installed on top and wired into the shell.
+* Tools like rg, fd or build essentials are recommended extras, but are not currently installed by the bootstrap script.
 * The system level is automatically active as soon as no other environment is activated.
 
 1. **Mamba Level**
@@ -51,7 +52,7 @@ My workflow is based on a five-level concept:
 * It includes tools like Jupyter Lab, pytorch, tensorflow, scikit-learn, and other data science libraries.
 * This level is always active if there is no .venv folder in the current location or you deactivate it.
 * Using `act` to activate an environment will automatically activate it in new terminals (.startenv).
-* An essential tool is Jupyter Lab (experiments, notes, prototypes). It is started with the script 'jl': `jl [<folder>]`.
+* An essential tool is Jupyter Lab (experiments, notes, prototypes). It is started with the script `jl`: `jl [-x] [<folder>]`.
 * This level is highly volatile. The rule applies: **no updates, just delete and recreate**. This is the only way to eliminate the dependency conflicts that can occur when using uv in a Mamba environment.
 
 2. **Project / .venv Level**
@@ -100,7 +101,7 @@ mamba deactivate && mamba remove -y -n <envname> --all && mamba create -y -n <en
 ### Installation
 
 * Run `bash scripts/install_luxuspythonstack.sh` to install the Level 0 tooling and wire your shell setup.
-* The installer appends `source scripts/.bash_lib_luxuspythonstack`, restores the saved Mamba environment from `~/.startenv`, and enables the `direnv` bash hook in `~/.bashrc`.
+* The installer appends an absolute `source .../.bash_lib_luxuspythonstack` line, restores the saved Mamba environment from `~/.startenv`, and enables the `direnv` bash hook in `~/.bashrc`.
 * Reload the shell afterwards with `source ~/.bashrc`.
 
 ### References

@@ -1,4 +1,27 @@
-cw() { [[ "$1" == "." ]] && echo "$PWD" > "$HOME/.config/current_working_folder" || cd "$(cat "$HOME/.config/current_working_folder")"; }
+cw() {
+    local _state_dir="$HOME/.config"
+    local _state_file="$_state_dir/current_working_folder"
+    local _target
+
+    if [[ "${1:-}" == "." ]]; then
+        mkdir -p "$_state_dir"
+        printf '%s\n' "$PWD" > "$_state_file"
+        return 0
+    fi
+
+    if [[ ! -f "$_state_file" ]]; then
+        echo "No working folder saved. Run 'cw .' first." >&2
+        return 1
+    fi
+
+    _target="$(<"$_state_file")"
+    if [[ -z "$_target" || ! -d "$_target" ]]; then
+        echo "Saved working folder is invalid: $_target" >&2
+        return 1
+    fi
+
+    cd "$_target" || return 1
+}
 
 alias rlb="source ~/.bashrc"
 alias pypurge='pip cache purge; mamba clean --all'
@@ -24,8 +47,6 @@ pyinit() { bash "$_LUXUS_SCRIPTS_DIR/pyinit.sh" "$@"; }
 
 # jl: start Jupyter Lab — sources launch_jupyter.sh to load its jl() function
 source "$_LUXUS_SCRIPTS_DIR/launch_jupyter.sh"
-
-unset _LUXUS_SCRIPTS_DIR
 
 
 EMOJIS=(🐧 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 )
