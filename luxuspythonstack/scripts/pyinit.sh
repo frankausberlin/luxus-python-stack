@@ -11,11 +11,13 @@
 # What it creates:
 #   - uv project (app or library) with Python 3.12
 #   - .venv/ virtual environment
+#   - .python-version pin
 #   - pyproject.toml with bump-my-version config
 #   - .vscode/settings.json with Ruff formatter
+#   - .vscode/launch.json for debugging
 #   - .envrc for direnv auto-activation
 #   - .gitignore from gitignore.io (Python + Linux + VSCode)
-#   - Dev dependencies: ruff pytest basedpyright colorlog bump-my-version just pre-commit
+#   - Dev dependencies: ruff pytest basedpyright colorlog bump-my-version pre-commit
 #   - Git repository (if not already initialized)
 #   - Justfile for task running
 #   - .pre-commit-config.yaml for local quality checks
@@ -48,7 +50,7 @@ export UV_PYTHON_PREFERENCE=only-managed
 uv init "$_type" --python 3.12
 
 # ─── Step 3: Add dev dependencies ─────────────────────────────────────────────
-uv add --dev ruff pytest basedpyright colorlog bump-my-version just pre-commit
+uv add --dev ruff pytest basedpyright colorlog bump-my-version pre-commit
 
 # ─── Step 4: VS Code configuration ────────────────────────────────────────────
 mkdir -p .vscode
@@ -71,6 +73,30 @@ cat > .vscode/settings.json << 'VSCODE_EOF'
 }
 VSCODE_EOF
 
+cat > .vscode/launch.json << 'LAUNCH_EOF'
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Pytest",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["-s", "${file}"],
+            "console": "integratedTerminal"
+        }
+    ]
+}
+LAUNCH_EOF
+
 # ─── Step 5: bump-my-version config ───────────────────────────────────────────
 cat >> pyproject.toml << 'BUMP_EOF'
 
@@ -78,7 +104,7 @@ cat >> pyproject.toml << 'BUMP_EOF'
 current_version = "0.1.0"
 commit = true
 tag = true
-commit_args = "-m 'chore: bump version from {current_version} to {new_version}'"
+message = "chore: bump version from {current_version} to {new_version}"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
@@ -118,26 +144,37 @@ set shell := ["bash", "-uc"]
 
 # Run the project
 run:
-uv run python src/$(basename "$PWD" | tr '-' '_')/main.py
+    uv run python src/$(basename "$PWD" | tr '-' '_')/main.py
 
 # Run tests
 test:
-uv run pytest
+    uv run pytest
 
-# Run linters and formatters
+# Run linters and type checker (find errors)
 lint:
-uv run ruff check .
-uv run ruff format --check .
-uv run basedpyright
+    uv run ruff check .
+    uv run ruff format --check .
+    uv run basedpyright
+
+# Type check only
+typecheck:
+    uv run basedpyright
+
+# Full local quality gate (lint + typecheck + tests)
+check:
+    uv run ruff check .
+    uv run ruff format --check .
+    uv run basedpyright
+    uv run pytest
 
 # Fix linting issues
 fix:
-uv run ruff check --fix .
-uv run ruff format .
+    uv run ruff check --fix .
+    uv run ruff format .
 
 # Bump version (patch, minor, major)
 bump part="patch":
-uv run bump-my-version {{part}}
+    uv run bump-my-version {{part}}
 JUST_EOF
 
 # ─── Step 9: pre-commit setup ─────────────────────────────────────────────────
@@ -178,6 +215,7 @@ echo "  2. Start coding in src/${PROJECT_NAME//-/_}/"
 echo "  3. Run tests with: just test"
 echo "  4. Lint with:      just lint"
 echo "  5. Auto-fix:       just fix"
+echo "  6. Full gate:      just check"
 echo ""
 echo "  To release:"
 echo "  just bump patch"

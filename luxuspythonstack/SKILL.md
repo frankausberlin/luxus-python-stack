@@ -65,11 +65,12 @@ The script creates:
 - `src/<project>/` structure
 - `pyproject.toml` with UV configuration
 - `.venv/` virtual environment (Python 3.12)
+- `.python-version` pin
 - `.vscode/settings.json` with Ruff formatter
 - `.envrc` for direnv auto-activation
 - `.gitignore` (from gitignore.io)
 - `bump-my-version` config in `pyproject.toml`
-- Dev dependencies: `ruff pytest basedpyright colorlog bump-my-version just pre-commit`
+- Dev dependencies: `ruff pytest basedpyright colorlog bump-my-version pre-commit`
 - `Justfile` for task running
 - `.pre-commit-config.yaml` for local quality checks
 
@@ -123,6 +124,8 @@ just test                        # run tests
 **Code quality**:
 ```bash
 just lint                 # lint: find errors (ruff + basedpyright)
+just typecheck            # type check with basedpyright
+just check                # full local quality gate
 just fix                  # lint: auto-fix (ruff)
 ```
 
@@ -174,7 +177,7 @@ Every repository using this stack includes two special files:
 **Session end workflow**:
 1. Write/update `SESSION.md` with session summary
 2. Commit all changes (pre-commit hooks will run automatically)
-3. Run quality checks manually if needed: `just lint`
+3. Run the local quality gate: `just check`
 
 ## Key Shell Functions
 

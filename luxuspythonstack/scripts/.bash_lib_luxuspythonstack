@@ -1,0 +1,43 @@
+cw() { [[ "$1" == "." ]] && echo "$PWD" > "$HOME/.config/current_working_folder" || cd "$(cat "$HOME/.config/current_working_folder")"; }
+
+alias rlb="source ~/.bashrc"
+alias pypurge='pip cache purge; mamba clean --all'
+
+# act: activate a Mamba environment and persist it for new shells
+act() {
+    local _env_name="${1:-}"
+
+    if [[ -z "$_env_name" ]]; then
+        echo "Usage: act <envname>" >&2
+        return 1
+    fi
+
+    echo "$_env_name" > "$HOME/.startenv"
+    mamba activate "$_env_name"
+}
+
+# Resolve the directory of this lib file once at source time
+_LUXUS_SCRIPTS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+
+# pyinit: wrapper that calls the standalone pyinit.sh script
+pyinit() { bash "$_LUXUS_SCRIPTS_DIR/pyinit.sh" "$@"; }
+
+# jl: start Jupyter Lab — sources launch_jupyter.sh to load its jl() function
+source "$_LUXUS_SCRIPTS_DIR/launch_jupyter.sh"
+
+unset _LUXUS_SCRIPTS_DIR
+
+
+EMOJIS=(🐧 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 )
+RANDOM_EMOJI() { echo "${EMOJIS[$RANDOM % ${#EMOJIS[@]}]}"; }
+python_info() {
+    if [[ -n "$VIRTUAL_ENV" || -d "./.venv" ]]; then
+        echo -e "\033[1;31m(\033[1;36m$(basename "$PWD")\033[1;31m)\033[0m"
+    elif [[ -n "$CONDA_DEFAULT_ENV" ]]; then
+        echo -e "\033[1;32m(\033[1;34m$CONDA_DEFAULT_ENV\033[1;32m)\033[0m"
+    fi
+}
+# My smart PS1: shows random emoji, user@host, current folder, python env info
+export VIRTUAL_ENV_DISABLE_PROMPT=1; prompt_user=$(whoami); prompt_host=$(hostname)
+PS1='$(RANDOM_EMOJI) \[\033[1;32m\]╭──(\[\033[1;34m\]${prompt_user}@${prompt_host}\[\033[1;32m\])─[\[\033[1;37m\]\w\[\033[1;32m\]] $(python_info)
+\[\033[1;32m\]╰─\[\033[1;34m\]\$\[\033[0m\] '

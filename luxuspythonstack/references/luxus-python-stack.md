@@ -1,32 +1,32 @@
 ## 💎 Luxurious Python Stack
 
-<table width=1200><tr></tr><tr><td colspan=5><hr></td></tr><tr><td align=center>
+<table width=800><tr></tr><tr><td colspan=5><hr></td></tr><tr><td align=center>
 
-🧱 Level 0<br><br>Global / System
+&nbsp;&nbsp;&nbsp;🧱 Level 0&nbsp;&nbsp;&nbsp;<br><br>Global <br> System
 </td><td align=center>
 
-🧱 Level 1<br><br>Mamba / Jupyter
+🧱 Level 1<br><br>Mamba <br> Jupyter
 </td><td align=center>
 
-🧱 Level 2<br><br>Projects / .venv
+🧱 Level 2<br><br>Projects <br> .venv
 </td><td align=center>
 
-🧱 Level 3<br><br>CI / Deployment
+🧱 Level 3<br><br>CI <br> Deployment
 </td><td align=center>
 
-🧱 Level 4<br><br>AI Agents / Vibe Coding
+🧱 Level 4<br><br>AI Agents <br> Vibe Coding
 </td></tr><tr><td colspan=5><hr></td></tr></table>
 
 Ultimately, it is a combination of tools, scripts and aliases that allow me to work efficiently and flexibly with Python. By separating it into different levels, I can ensure that I always have the right environment for my projects without causing conflicts between different projects or Python environments.
 
-Tools:
+Tools (install_luxuspythonstack.sh):
 - **Mamba**: A fast and efficient package manager that allows me to create and manage Python environments easily.
 - **UV**: A tool for managing Python versions and virtual environments, which I use to switch between different Python versions and environments seamlessly.
 - **direnv**: A tool that allows me to automatically load and unload environment variables based on the directory I am in, which is particularly useful for managing project-specific environments and dependencies.
-- **Ruff & MyPy**: Tools for linting and type checking.
+- **Ruff & basedpyright**: Tools for linting, formatting, and type checking.
 - **bump-my-version**: Automated publishing.
 
-Scripts and Aliases:
+Scripts and Aliases (.bash_lib_luxuspythonstack):
 - **cw**: `cw` -> change to working folder / `cw .` -> make current folder the working folder.
 - **act**: Activates a Mamba environment and saves it in the file ~/.startenv.
 - **pyinit**: Creates a Python project with all files and folders (src, tests, pyproject.toml, etc.) and initializes a UV environment.
@@ -42,7 +42,7 @@ My workflow is based on a five-level concept:
 
 * The standard Python is available here (/usr/bin/python).
 * Important tools such as git, rg, fd and the build essentials are installed.
-* UV, direnv and Mamba are also installed but not set up.
+* UV, direnv, just, ruff, basedpyright and Mamba are also installed but not set up.
 * The system level is automatically active as soon as no other environment is activated.
 
 1. **Mamba Level**
@@ -59,14 +59,15 @@ My workflow is based on a five-level concept:
 * This level is intended for folders with .venv, for example for projects.
 * As soon as there is a .venv folder in the current folder, it will be automatically activated (after direnv activate).
 * With `pyinit` you can quickly create a new project with a .venv folder and have the required files and folders created.
+* The canonical implementation lives in `scripts/pyinit.sh`; this document links to the script instead of embedding it inline.
 * If you prefer to work with uv venv / init yourself, this is not a problem, as direnv automatically activates .venv if you want.
 
 3. **CI / Deployment Level**
 
 * This level acts as the automated gatekeeper between local development and production/publishing. It is primarily powered by GitHub Actions.
 * Environment Parity: Thanks to uv.lock, the CI server exactly mirrors the Level 2 project environment. The CI pipeline runs uv sync to ensure 100% reproducible builds.
-* Continuous Integration (CI): On every push or Pull Request, automated workflows run the identical code quality checks used locally: uv run ruff check, uv run mypy, and uv run pytest. Code that fails here cannot be merged.
-* Release Automation: Versioning and Git tagging are fully automated to prevent human error. Using a manual trigger (workflow_dispatch) in GitHub Actions, bump-my-version handles the version bump, commit, and tagging in a single atomic step.
+* Continuous Integration (CI): On every push or Pull Request, automated workflows run the identical code quality checks used locally through `just check`. Code that fails here cannot be merged.
+* Release Automation: Versioning and Git tagging are fully automated to prevent human error. `bump-my-version` should use `message = "..."` in the configuration and must not use `commit_args = "-m ..."`.
 * Automated building and publishing to PyPI via uv build and uv publish.
 
 
@@ -92,159 +93,30 @@ My workflow is based on a five-level concept:
 > I use the data science environment in a way that makes this problem irrelevant. I'm constantly installing new libraries, deleting old ones, and experimenting. But just as frequently (sometimes twice a day), I completely wipe the environment (reinstall it).
 
 ```shell
-mamba deactivate
-mamba remove -y -n <envname> --all
-mamba create -y -n <envname> ...
+mamba deactivate && mamba remove -y -n <envname> --all && mamba create -y -n <envname> ...
 ```
 > That's why I use `uv`; it's so incredibly fast.
 
 ### Installation
 
-```shell
-sudo apt update && sudo apt install python3 direnv
-curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
-bash Miniforge3-$(uname)-$(uname -m).sh
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv tool install ruff@latest
+* Run `bash scripts/install_luxuspythonstack.sh` to install the Level 0 tooling and wire your shell setup.
+* The installer appends `source scripts/.bash_lib_luxuspythonstack`, restores the saved Mamba environment from `~/.startenv`, and enables the `direnv` bash hook in `~/.bashrc`.
+* Reload the shell afterwards with `source ~/.bashrc`.
 
-# use main trunk
-git config --global init.defaultBranch main
-```
+### References
 
+* **blueprint-AGENTS.md** - A blueprint for creating AGENTS.md so that the AI ​​agent can work with the project using the Luxus Python stack. 
+* **daily-commands.md** - A reference for all the daily commands and their purpose.
+  
 
 ### Scripts
 
-```shell
-cw () { [[ "$1" == "." ]] && echo "$PWD" > "$HOME/.config/current_working_folder" || cd "$(cat "$HOME/.config/current_working_folder")"; }
-```
+*All scripts are located in the `scripts` folder of the skill.*
 
-```shell
-alias rlb="source ~/.bashrc"
-```
-
-```shell
-act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; }
-```
-
-```shell
-# Starts Jupyter Lab on localhost with specified port, allowing origin from colab, no browser, etc.
-jl () { 
-    # --- Directory Logic ---
-    # Default to ~/labor if no arg provided; handle "." for current dir or specific path
-    __notebookdir=$( [[ "${1:-$HOME/labor}" == "." ]] && pwd || echo "${1:-$HOME/labor}" )
-    # --- UI Enhancement: Status Info ---
-    echo -e "\n\e[95m Jupyter Lab is launching \e[0m"
-    echo -e "URL:          \e[1;3;34mhttp://localhost:8888/lab/\e[0m"
-    echo -e "Notebook-dir: \e[1;3;34m$__notebookdir\e[0m"
-    echo -e "Environment:  $_env_msg"
-    echo -e "Instance:     \e[1;3;34m$(which jupyter)\n"
-    # --- Launch Jupyter Lab ---
-    jupyter lab \
-        --notebook-dir="$__notebookdir" --port=8888 --allow-root --no-browser \
-        --NotebookApp.allow_origin='https://colab.research.google.com' \
-        --NotebookApp.port_retries=0 --NotebookApp.token='' \
-        --NotebookApp.disable_check_xsrf=True --NotebookApp.allow_credentials=True
-}
-```
-
-```shell
-# pyinit: Luxury Python Project Initializer (Usage: pyinit [project_name] [--lib])
-pyinit() {
-    # 0. Parse arguments: check for --lib flag and extract directory name
-    local _dir="."; local _type="--app"; for arg in "$@"; do [[ "$arg" == "--lib" ]] && _type="--lib" || _dir="$arg"; done
-    # 1. Create and enter directory (if a name was passed)
-    [[ "$_dir" != "." ]] && mkdir -p "$_dir" && cd "$_dir"
-    echo -e "\e[34m💎 Initializing $_type project in $(basename "$PWD")...\e[0m"
-    # forcing managed Python to avoid mamba conflicts and uv init it.
-    export UV_PYTHON_PREFERENCE=only-managed && uv init $_type --python 3.12
-    # 2. Add essential Dev-Tools (inkl. bump-my-version)
-    uv add --dev ruff pytest mypy colorlog bump-my-version
-    # 3. Setup VS Code Configuration (compact JSON)
-    mkdir -p .vscode && cat <<EOF > .vscode/settings.json
-{
-    "python.defaultInterpreterPath": "${PWD}/.venv/bin/python",
-    "python.analysis.typeCheckingMode": "basic",
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.codeActionsOnSave": {
-        "source.fixAll.ruff": "always",
-        "source.organizeImports.ruff": "always"
-    },
-    "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": [
-        "src",
-        "tests"
-    ],
-    "python.terminal.activateEnvironment": true
-}
-EOF
-    # 4. 🚀 Setup bump (auto-tag releases)
-    cat <<EOF >> pyproject.toml
-[tool.bumpversion]
-current_version = "0.1.0"
-commit = true
-tag = true
-commit_args = "-m 'chore: bump version from {current_version} to {new_version}'"
-[[tool.bumpversion.files]]
-filename = "pyproject.toml"
-search = 'version = "{current_version}"'
-replace = 'version = "{new_version}"'
-EOF
-    # 5. Create .envrc for direnv with auto-activation
-    echo "source .venv/bin/activate" > .envrc && direnv allow
-    # 6. Initialize Git and fetch a modern .gitignore
-    [[ ! -d ".git" ]] && git init && curl -s https://www.toptal.com/developers/gitignore/api/python,linux,vscode > .gitignore
-    cat <<EOF >> .gitignore
-# insert by 'Luxurious Python Stack'
-# volatile, agent-generated data
-SESSION.md
-plans/
-# freestyle: here you can put whatever you want
-ignore/
-ign/
-ignored/
-ignored.txt
-ingored.md
-# end of 'Luxurious Python Stack'    
-EOF
-    # 7. Final Sync & Success message
-    uv sync && echo -e "\e[32m✨ Success! Project '$(basename "$PWD")' is ready.\e[0m"
-} # end pyinit
-```
-
-```shell
-alias pypurge='pip cache purge; mamba clean --all'
-```
-
-
-### Insert in .bashrc
-
-```shell
-# direnv hook (MUST BE AT THE END)
-eval "$(direnv hook bash)"
-```
-
-```shell
-# replace generated activation in .bashrc with this
-mamba activate $([[ -f ~/.startenv ]] && cat ~/.startenv || echo base)
-```
-
-```shell
-# optional:
-EMOJIS=(🐧 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 )
-RANDOM_EMOJI() { echo "${EMOJIS[$RANDOM % ${#EMOJIS[@]}]}"; }
-python_info() {
-    if [[ -n "$VIRTUAL_ENV" || -d "./.venv" ]]; then
-        echo -e "\033[1;31m(\033[1;36m$(basename "$PWD")\033[1;31m)\033[0m"
-    elif [[ -n "$CONDA_DEFAULT_ENV" ]]; then
-        echo -e "\033[1;32m(\033[1;34m$CONDA_DEFAULT_ENV\033[1;32m)\033[0m"
-    fi
-}
-# My smart PS1: shows random emoji, user@host, current folder, python env info
-export VIRTUAL_ENV_DISABLE_PROMPT=1; prompt_user=$(whoami); prompt_host=$(hostname)
-PS1='$(RANDOM_EMOJI) \[\033[1;32m\]╭──(\[\033[1;34m\]${prompt_user}@${prompt_host}\[\033[1;32m\])─[\[\033[1;37m\]\w\[\033[1;32m\]] $(python_info)
-\[\033[1;32m\]╰─\[\033[1;34m\]\$\[\033[0m\] '
-```
+* **.bash_lib_luxuspythonstack** - A collection of shell aliases and functions for the Luxus Python Stack. 
+* **install_luxuspythonstack.sh** - A script to set up the Level 0 tools and change the .bashrc for the Luxus Python Stack.
+* **pyinit.sh** - A script to initialize a new Python project with a standard structure for the Luxus Python Stack.
+* **launch_jupyter.sh** - A script to start Jupyter Lab.
 
 ### Data Science Environment (example)
 
@@ -261,52 +133,5 @@ jupyter labextension enable jupyter_http_over_ws && echo $ENV_NAME > ~/.startenv
 python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 # _____________________________insert_in_.bashrc_and_use_'act'_instead_of_'mamba_activate'_________________________________________
 # mamba activate $(cat ~/.startenv)
-# act() { [ "$#" -ne 0 ] && echo $1 > .startenv && mamba activate $1; }
+# act() { [ "$#" -ne 0 ] && echo $1 > ~/.startenv && mamba activate $1; }
 ```
-
-
-
-## 🧑‍💻 <font color=blue><b>The Daily Workflow</b></font>
-
-### **A handful of fundamental concepts and considerations**
-
-* **`uv run` vs. `direnv`**<br>
-The luxury Python stack uses `direnv`. This theoretically eliminates the need for `uv run` when executing commands in the terminal. However, it's important to note that `direnv` just activates the environment, while `uv run` automatically triggers a dependency sync if things have changed (e.g., after a `git pull`).<br>
-> **Recommendation:** Always use `uv run` in scripts, aliases, and CI/CD pipelines to guarantee 100% reproducibility. In everyday local terminal use, you can safely omit it to save keystrokes. If module errors arise, simply run `uv sync`.
-
-* **Dev & Release**<br>
-A project generally exists in two states: development and release. These are the most important differences:
-  * **Dev State:** Your everyday working mode. The code is fluid, and you rely heavily on your dev-dependencies (`pytest`, `ruff`, `mypy`). The version in your `pyproject.toml` remains static while you build features.
-  * **Release State:** A frozen, stable snapshot in time. The version number is officially incremented, and a Git tag (e.g., `v0.2.0`) marks the exact commit. This is the state that CI/CD pipelines expect in order to build, test, and deploy your code reliably.
-
-* **Bump a Release (`bump-my-version`)**<br>
-Releasing a new version requires keeping the code version (in `pyproject.toml`) and the Git tags perfectly synchronized. Doing this manually (editing the file, committing, and tagging) is highly error-prone and can easily break CI/CD pipelines.<br>
-> **Recommendation:** Never edit the version or create tags manually. Use `bump-my-version` to automatically update the configuration, create a clean commit, and set the Git tag in one atomic step. <br>
-> **Workflow:** When a feature or bugfix is ready, run `uv run bump-my-version [patch|minor|major]`. Afterwards, push the code and the new tag to your remote repository via `git push origin main --tags`.
----
-
-### **Daily Usecases**
-
-**1. Dependencies & Environment**
-* Add package: `uv add <package>`
-* Add dev tool: `uv add --dev <package>`
-* Sync environment: `uv sync`
-
-**2. Execution & Testing**
-* Run code: `python src/my_project/main.py`
-* Run tests: `pytest`
-
-**3. Code Quality**
-* Linting (find errors): `ruff check .`
-* Linting (auto-fix): `ruff check --fix .`
-* Type checking: `mypy src/`
-
-**4. Release & Deployment**
-* **Bump Version (Git Commit & Tag):**
-  * Patch (Bugfixes, e.g., 0.2.0 -> 0.2.1): `uv run bump-my-version patch`
-  * Minor (Features, e.g., 0.2.1 -> 0.3.0): `uv run bump-my-version minor`
-* **Sync to Remote:**
-  * Push code and tags: `git push origin main --tags`
-* **Package & Publish (If not handled by CI/CD):**
-  * Build the package (creates `dist/`): `uv build`
-  * Upload to PyPI / Registry: `uv publish`

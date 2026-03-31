@@ -8,7 +8,7 @@ Welcome, AI Agent! You are operating within the **Luxurious Python Stack** (Leve
 ## 🏗️ Architecture & Conventions
 - **Core Logic:** Located in `src/{{PACKAGE_NAME}}/`.
 - **Tests:** Located in `tests/`.
-- **Typing:** Strict type hinting is mandatory. We enforce Mypy compatibility.
+- **Typing:** Strict type hinting is mandatory. `basedpyright` is the primary type checker.
 - **Docstrings:** Use Google-style docstrings for all public functions and classes.
 - **Import style:** We use `__init__.py` as a facade. External imports should run via the main package.
 
@@ -21,21 +21,22 @@ This project is strictly managed by `uv`. **Do not use `pip`, `poetry`, or stand
    - Sync environment: `uv sync`
 2. **Execution:** ALWAYS prefix commands with `uv run` to guarantee reproducibility (e.g., `uv run ruff check .`).
 3. **Quality Gate:** 
-   - Linting & Formatting: `uv run ruff check .` and `uv run ruff check --fix .`
-   - Type Checking: `uv run mypy src/`
-   - Testing: `uv run pytest`
+    - Linting & Formatting: `uv run ruff check .` and `uv run ruff check --fix .`
+    - Type Checking: `uv run basedpyright`
+    - Testing: `uv run pytest`
+    - Unified gate: `just check`
 
 ## 🚀 Versioning & Releases
 We use `bump-my-version` for automated semantic versioning.
 - **NEVER** change versions manually in `pyproject.toml` or `__init__.py`. This breaks the CI/CD pipeline!
-- To bump a version, ensure the working tree is clean and run: `uv run bump-my-version [patch|minor|major]`.
+- To bump a version, ensure the working tree is clean and run: `just bump patch|minor|major`.
 - Do **not** use `commit_args = "-m ..."` in the config, as it breaks internal commit management.
 
 ## 🧑‍💻 The "Vibe Coding" Workflow (Session Lifecycle)
 As an AI Agent, you must adhere to the following session state management:
 
 1. **Initialization:** At the absolute beginning of your task, read `SESSION.md` (if it exists) to understand the context, recent changes, and current roadmap.
-2. **Execution:** Perform your coding tasks, run tests, and ensure `ruff` and `mypy` pass without errors.
+2. **Execution:** Perform your coding tasks, run tests, and ensure `just check` passes without errors.
 3. **Finalization:** Before ending your interaction or completing the task, **overwrite** `SESSION.md` with a concise summary of what was just achieved, any open issues, and the immediate next steps.
 
 ## 🐞 Debugging Protocol (Level 2)
