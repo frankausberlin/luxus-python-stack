@@ -26,18 +26,18 @@ The Python stack provides specific <b>tools, rules and best practices</b> for ea
 
 
 ```
-├── luxuspythonstack               # Skill-Folder
-│   ├── references                 # References for the agent skill
-│   │   ├── blueprint-AGENTS.md    # Blueprint for the AGENTS.md
-│   │   ├── daily-commands.md      # For the daily workflow and commands
-│   │   └── luxus-python-stack.md  # The complete Python stack
-│   ├── scripts                    # Scripts for the agent skill
+├── luxuspythonstack                     # Skill-Folder
+│   ├── references                       # References for the agent skill
+│   │   ├── blueprint-AGENTS.md          # Blueprint for the AGENTS.md
+│   │   ├── daily-commands.md            # For the daily workflow and commands
+│   │   └── luxus-python-stack.md        # The complete Python stack
+│   ├── scripts                          # Scripts for the agent skill
 │   │   ├── .bash_lib_luxuspythonstack   # Shell functions and aliases
-│   │   ├── install_luxuspythonstack.sh  # Install Level 0 tools and shell setup
+│   │   ├── check-and-install.sh         # Install Level 0 tools
 │   │   ├── launch_jupyter.sh            # Start Jupyter Lab
 │   │   └── pyinit.sh                    # Create a Stack-Project
-│   └── SKILL.md                   # The agent skill
-└── README.md                      # This file
+│   └── SKILL.md                         # The agent skill
+└── README.md                            # This file
 ```
 
 ## Direct links
