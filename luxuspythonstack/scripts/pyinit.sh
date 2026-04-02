@@ -12,17 +12,21 @@
 #   - uv project (app or library) with Python 3.12
 #   - .venv/ virtual environment
 #   - .python-version pin
-#   - pyproject.toml with bump-my-version config
-#   - .vscode/settings.json with Ruff formatter
+#   - pyproject.toml with ruff, basedpyright, pytest, and bump-my-version config
+#   - .vscode/settings.json with Ruff formatter (strict type checking)
 #   - .vscode/launch.json for debugging
-#   - .envrc for direnv auto-activation
+#   - .envrc for direnv auto-activation (with conda deactivation guard)
 #   - .gitignore from gitignore.io (Python + Linux + VSCode)
 #   - Dev dependencies: ruff pytest pytest-cov basedpyright colorlog bump-my-version pre-commit
 #   - Git repository (if not already initialized)
 #   - Justfile for task running
-#   - .pre-commit-config.yaml for local quality checks
+#   - .pre-commit-config.yaml for local quality checks (hygiene + ruff, no basedpyright)
+#   - .github/workflows/ci.yml and release.yml (Level 3: CI/CD)
+#   - AGENTS.md from blueprint template (Level 4: AI Agent Guidelines)
 
 set -euo pipefail
+
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ─── Parse arguments ──────────────────────────────────────────────────────────
 _dir="."
@@ -74,7 +78,7 @@ mkdir -p .vscode
 cat > .vscode/settings.json << 'VSCODE_EOF'
 {
     "python.defaultInterpreterPath": ".venv/bin/python",
-    "python.analysis.typeCheckingMode": "standard",
+    "python.analysis.typeCheckingMode": "strict",
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
@@ -115,7 +119,28 @@ cat > .vscode/launch.json << 'LAUNCH_EOF'
 LAUNCH_EOF
 
 # ─── Step 5: bump-my-version config ───────────────────────────────────────────
-cat >> pyproject.toml << 'BUMP_EOF'
+cat >> pyproject.toml << 'TOOLS_EOF'
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "D", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.basedpyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra -q"
 
 [tool.bumpversion]
 current_version = "0.1.0"
@@ -127,10 +152,16 @@ message = "chore: bump version from {current_version} to {new_version}"
 filename = "pyproject.toml"
 search = 'version = "{current_version}"  # project-version'
 replace = 'version = "{new_version}"  # project-version'
-BUMP_EOF
+TOOLS_EOF
 
 # ─── Step 6: direnv setup ─────────────────────────────────────────────────────
-echo "source .venv/bin/activate" > .envrc
+cat > .envrc << 'ENVRC_EOF'
+# Deactivate any active non-base Conda environment to prevent variable leakage
+if [[ -n "$CONDA_DEFAULT_ENV" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
+    conda deactivate 2>/dev/null || true
+fi
+source .venv/bin/activate
+ENVRC_EOF
 direnv allow
 
 # ─── Step 7: Git + .gitignore ─────────────────────────────────────────────────
@@ -250,9 +281,58 @@ bump part="patch":
 JUST_EOF
 fi
 
+# ─── Step 8b: GitHub Actions CI/CD workflows ──────────────────────────────────
+mkdir -p .github/workflows
+
+cat > .github/workflows/ci.yml << 'CI_EOF'
+name: CI
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --dev
+      - run: just check
+CI_EOF
+
+cat > .github/workflows/release.yml << 'RELEASE_EOF'
+name: Release
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv build
+      - run: uv publish
+RELEASE_EOF
+
+# ─── Step 8c: Generate AGENTS.md from blueprint ───────────────────────────────
+_BLUEPRINT="${_SCRIPT_DIR}/../references/blueprint-AGENTS.md"
+if [[ -f "$_BLUEPRINT" ]]; then
+    sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+        -e "s/{{PACKAGE_NAME}}/$PACKAGE_NAME/g" \
+        "$_BLUEPRINT" > AGENTS.md
+    echo -e "\e[34m   Generated AGENTS.md from blueprint.\e[0m"
+else
+    echo -e "\e[33m   Warning: blueprint-AGENTS.md not found, skipping AGENTS.md generation.\e[0m"
+fi
+
 # ─── Step 9: pre-commit setup ─────────────────────────────────────────────────
 cat > .pre-commit-config.yaml << 'PRECOMMIT_EOF'
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
   - repo: local
     hooks:
       - id: ruff-check
@@ -260,19 +340,13 @@ repos:
         entry: uv run ruff check --force-exclude
         language: system
         types_or: [python, pyi]
-        require_serial: true
       - id: ruff-format
         name: ruff format
         entry: uv run ruff format --force-exclude
         language: system
         types_or: [python, pyi]
-        require_serial: true
-      - id: basedpyright
-        name: basedpyright
-        entry: uv run basedpyright
-        language: system
-        types_or: [python, pyi]
-        pass_filenames: false
+# Note: basedpyright runs in `just check` and CI, not as a pre-commit hook.
+# Full-codebase type checking on every commit is too slow for interactive work.
 PRECOMMIT_EOF
 
 # ─── Step 10: Final sync & install hooks ──────────────────────────────────────
