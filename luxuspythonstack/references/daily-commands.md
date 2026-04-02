@@ -45,8 +45,9 @@ act <envname>                        # activate + save to ~/.startenv
 mamba activate <envname>             # activate without saving
 mamba deactivate                     # deactivate
 mamba activate base                  # back to base
-jl [folder]                          # start Jupyter Lab without token
-jl -x [folder]                       # start Jupyter Lab with token enabled
+jl [folder]                          # start Jupyter Lab (secure, token enabled)
+jl -x [folder]                       # start Jupyter Lab without token (unsafe)
+jl --colab [folder]                  # start Jupyter Lab with Colab origin
 
 # Recreate environment
 py=3.12 && ENV_NAME="ds${py: -2}"
@@ -222,7 +223,7 @@ cat > SESSION.md << 'SESSION_EOF'
 - ...
 SESSION_EOF
 
-git add SESSION.md   # SESSION.md is in .gitignore, this won't commit it
+# Note: SESSION.md is in .gitignore, no git action needed
 ```
 
 ---

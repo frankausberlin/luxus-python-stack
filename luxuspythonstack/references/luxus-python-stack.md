@@ -31,7 +31,7 @@ Scripts and Aliases (.bash_lib_luxuspythonstack):
 - **act**: Activates a Mamba environment and saves it in the file ~/.startenv.
 - **pyinit**: Creates a Python project with all files and folders (src, tests, pyproject.toml, etc.) and initializes a UV environment.
 - **pypurge**: An alias for purging the pip cache and cleaning the Mamba environment.
-- **jl**: Starts Jupyter Lab in a default folder or optional in a specified folder. Use `jl -x [<folder>]` to keep the default Jupyter token enabled.
+- **jl**: Starts Jupyter Lab securely (token enabled by default) in a default folder or specified folder. Use `jl -x [<folder>]` to disable the token (unsafe). Use `jl --colab [<folder>]` to allow Google Colab origin.
 
 
 ### Five-level concept
@@ -52,7 +52,7 @@ My workflow is based on a five-level concept:
 * It includes tools like Jupyter Lab, pytorch, tensorflow, scikit-learn, and other data science libraries.
 * This level is always active if there is no .venv folder in the current location or you deactivate it.
 * Using `act` to activate an environment will automatically activate it in new terminals (.startenv).
-* An essential tool is Jupyter Lab (experiments, notes, prototypes). It is started with the script `jl`: `jl [-x] [<folder>]`.
+* An essential tool is Jupyter Lab (experiments, notes, prototypes). It is started with the script `jl`: `jl [-x] [--colab] [<folder>]`. Token is enabled by default; use `-x` to disable (unsafe).
 * This level is highly volatile. The rule applies: **no updates, just delete and recreate**. This is the only way to eliminate the dependency conflicts that can occur when using uv in a Mamba environment.
 
 2. **Project / .venv Level**

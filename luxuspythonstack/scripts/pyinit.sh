@@ -50,6 +50,22 @@ echo -e "\e[34m💎 Initializing $_type project in ${PROJECT_NAME}...\e[0m"
 export UV_PYTHON_PREFERENCE=only-managed
 uv init "$_type" --python 3.12
 
+# ─── Step 2b: Ensure proper directory structure ───────────────────────────────
+mkdir -p "src/$PACKAGE_NAME" tests
+touch "src/$PACKAGE_NAME/__init__.py"
+touch "tests/__init__.py" "tests/conftest.py" "tests/test_placeholder.py"
+
+if [[ "$_type" == "--app" ]]; then
+    touch "src/$PACKAGE_NAME/main.py"
+else
+    touch "src/$PACKAGE_NAME/py.typed"
+fi
+
+rm -f hello.py
+
+# Add sentinel comment to version line for safe bump-my-version matching
+sed -i 's/^version = "0.1.0"/version = "0.1.0"  # project-version/' pyproject.toml
+
 # ─── Step 3: Add dev dependencies ─────────────────────────────────────────────
 uv add --dev ruff pytest pytest-cov basedpyright colorlog bump-my-version pre-commit
 
@@ -109,8 +125,8 @@ message = "chore: bump version from {current_version} to {new_version}"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
-search = 'version = "{current_version}"'
-replace = 'version = "{new_version}"'
+search = 'version = "{current_version}"  # project-version'
+replace = 'version = "{new_version}"  # project-version'
 BUMP_EOF
 
 # ─── Step 6: direnv setup ─────────────────────────────────────────────────────

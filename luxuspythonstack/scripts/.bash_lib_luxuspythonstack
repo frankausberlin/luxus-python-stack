@@ -52,13 +52,13 @@ source "$_LUXUS_SCRIPTS_DIR/launch_jupyter.sh"
 EMOJIS=(🐧 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 )
 RANDOM_EMOJI() { echo "${EMOJIS[$RANDOM % ${#EMOJIS[@]}]}"; }
 python_info() {
-    if [[ -n "$VIRTUAL_ENV" || -d "./.venv" ]]; then
-        echo -e "\033[1;31m(\033[1;36m$(basename "$PWD")\033[1;31m)\033[0m"
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        echo "(venv: $(basename "$PWD"))"
     elif [[ -n "$CONDA_DEFAULT_ENV" ]]; then
-        echo -e "\033[1;32m(\033[1;34m$CONDA_DEFAULT_ENV\033[1;32m)\033[0m"
+        echo "(mamba: $CONDA_DEFAULT_ENV)"
     fi
 }
 # My smart PS1: shows random emoji, user@host, current folder, python env info
 export VIRTUAL_ENV_DISABLE_PROMPT=1; prompt_user=$(whoami); prompt_host=$(hostname)
-PS1='$(RANDOM_EMOJI) \[\033[1;32m\]╭──(\[\033[1;34m\]${prompt_user}@${prompt_host}\[\033[1;32m\])─[\[\033[1;37m\]\w\[\033[1;32m\]] $(python_info)
+PS1='$(RANDOM_EMOJI) \[\033[1;32m\]╭──(\[\033[1;34m\]${prompt_user}@${prompt_host}\[\033[1;32m\])─[\[\033[1;37m\]\w\[\033[1;32m\]] \[\033[1;31m\]$(python_info)\[\033[0m\]
 \[\033[1;32m\]╰─\[\033[1;34m\]\$\[\033[0m\] '
