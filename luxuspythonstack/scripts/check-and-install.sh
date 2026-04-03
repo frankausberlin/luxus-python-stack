@@ -2,14 +2,27 @@
 set -euo pipefail
 
 # =============================================================================
-# check-and-install.sh — Luxus Python Stack Level 0 Validator
+# check-and-install.sh — Luxus Python Stack Level 0 Installer
 #
 # Checks whether all required tools for Level 0 (System/Global) are installed,
 # detects conflicts with other Python environment managers, and offers to
-# install missing components.
+# install missing components.  After installation it deploys shell scripts to
+# a stable canonical location, wires the managed block in ~/.bashrc, and
+# configures git defaults.
 #
 # Usage: bash scripts/check-and-install.sh
+#
+# Supply-chain: override env vars to pin specific versions:
+#   MINIFORGE_VERSION=25.3.0-1 bash scripts/check-and-install.sh
 # =============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASHRC="$HOME/.bashrc"
+INSTALL_DIR="$HOME/.local/share/luxuspythonstack"
+LUXUS_BLOCK_START="# >>> Luxus Python Stack >>>"
+LUXUS_BLOCK_END="# <<< Luxus Python Stack <<<"
+DIRENV_HOOK='eval "$(direnv hook bash)"'
+MINIFORGE_VERSION="${MINIFORGE_VERSION:-latest}"
 
 # --- Platform Detection ------------------------------------------------------
 
@@ -351,13 +364,19 @@ install_miniforge() {
     echo ""
     echo -e "${BOLD}Installing Miniforge3...${NC}"
     local installer="Miniforge3-$(uname)-$(uname -m).sh"
-    local url="https://github.com/conda-forge/miniforge/releases/latest/download/${installer}"
+    local url
+    if [[ "$MINIFORGE_VERSION" == "latest" ]]; then
+        url="https://github.com/conda-forge/miniforge/releases/latest/download/${installer}"
+    else
+        url="https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/${installer}"
+    fi
+    echo -e "${CYAN}ℹ️  Downloading from: ${url}${NC}"
 
     if curl -L -o "$HOME/${installer}" "$url"; then
         # Verify SHA-256 checksum before executing the downloaded installer
         local sha_url="${url}.sha256"
         local expected_sha
-        if expected_sha=$(curl -sL "$sha_url" | awk '{print $1}'); then
+        if expected_sha=$(curl -fsSL "$sha_url" | awk '{print $1}' 2>/dev/null); then
             local actual_sha
             actual_sha=$(sha256sum "$HOME/${installer}" | awk '{print $1}')
             if [[ "$expected_sha" != "$actual_sha" ]]; then
@@ -425,6 +444,10 @@ install_ruff() {
         echo -e "${RED}❌ uv is required to install ruff${NC}"
         return 1
     fi
+    if uv tool list 2>/dev/null | grep -q "^ruff "; then
+        echo -e "${CYAN}ℹ️  ruff already installed via uv tool${NC}"
+        return 0
+    fi
     echo ""
     echo -e "${BOLD}Installing ruff via uv tool...${NC}"
     if uv tool install ruff@latest; then
@@ -441,6 +464,10 @@ install_basedpyright() {
         echo -e "${RED}❌ uv is required to install basedpyright${NC}"
         return 1
     fi
+    if uv tool list 2>/dev/null | grep -q "^basedpyright "; then
+        echo -e "${CYAN}ℹ️  basedpyright already installed via uv tool${NC}"
+        return 0
+    fi
     echo ""
     echo -e "${BOLD}Installing basedpyright via uv tool...${NC}"
     if uv tool install basedpyright; then
@@ -456,6 +483,10 @@ install_just() {
     if ! command -v uv &>/dev/null; then
         echo -e "${RED}❌ uv is required to install just${NC}"
         return 1
+    fi
+    if uv tool list 2>/dev/null | grep -q "^just "; then
+        echo -e "${CYAN}ℹ️  just already installed via uv tool${NC}"
+        return 0
     fi
     echo ""
     echo -e "${BOLD}Installing just via uv tool...${NC}"
@@ -532,6 +563,82 @@ install_missing() {
     echo -e "${BOLD}${GREEN}────────────────────────────────────────────────────────────${NC}"
 }
 
+# --- Post-Install: Deploy Scripts & Configure Shell --------------------------
+
+deploy_scripts() {
+    print_section "Deploying scripts to ${INSTALL_DIR}"
+
+    mkdir -p "$INSTALL_DIR"
+    local deployed=0
+    for script in .bash_lib_luxuspythonstack pyinit.sh launch_jupyter.sh; do
+        if [[ -f "$SCRIPT_DIR/$script" ]]; then
+            cp "$SCRIPT_DIR/$script" "$INSTALL_DIR/"
+            chmod +x "$INSTALL_DIR/$script" 2>/dev/null || true
+            print_ok "$script" "deployed"
+            ((deployed++)) || true
+        else
+            print_warn "$script" "not found in $SCRIPT_DIR"
+        fi
+    done
+    echo -e "  ${CYAN}ℹ️  ${deployed} script(s) deployed to ${INSTALL_DIR}${NC}"
+}
+
+configure_bashrc() {
+    print_section "Configuring ~/.bashrc (managed block)"
+
+    # Remove any existing managed block so re-runs replace instead of appending
+    if grep -Fq "$LUXUS_BLOCK_START" "$BASHRC" 2>/dev/null; then
+        awk "
+            /$LUXUS_BLOCK_START/{found=1; next}
+            /$LUXUS_BLOCK_END/{found=0; next}
+            !found{print}
+        " "$BASHRC" > "${BASHRC}.tmp" && mv "${BASHRC}.tmp" "$BASHRC"
+        print_info "Replaced existing managed block"
+    else
+        print_info "Adding new managed block"
+    fi
+
+    # Append fresh block with failure-tolerant activation
+    cat >> "$BASHRC" <<EOF
+
+$LUXUS_BLOCK_START
+# Source the Luxus shell library (guards against missing file)
+[[ -f "$INSTALL_DIR/.bash_lib_luxuspythonstack" ]] && \\
+    source "$INSTALL_DIR/.bash_lib_luxuspythonstack"
+# Restore saved Mamba environment (failure-tolerant)
+if command -v mamba &>/dev/null; then
+    _luxus_env=\$([[ -f "\$HOME/.startenv" ]] && cat "\$HOME/.startenv" || echo "base")
+    mamba activate "\$_luxus_env" 2>/dev/null || mamba activate base 2>/dev/null || true
+fi
+$LUXUS_BLOCK_END
+EOF
+    print_ok "bashrc" "managed block written"
+
+    # direnv hook (must be last in .bashrc)
+    if ! grep -Fqx "$DIRENV_HOOK" "$BASHRC" 2>/dev/null; then
+        printf '\n# direnv hook (MUST BE AT THE END)\n%s\n' "$DIRENV_HOOK" >> "$BASHRC"
+        print_ok "direnv hook" "appended to ~/.bashrc"
+    else
+        print_ok "direnv hook" "already present"
+    fi
+}
+
+configure_git_defaults() {
+    print_section "Git defaults"
+    git config --global init.defaultBranch main
+    print_ok "git" "init.defaultBranch = main"
+}
+
+print_version_summary() {
+    print_section "Installed versions"
+    printf "  %-18s %s\n" "uv:" "$(uv --version 2>/dev/null || echo 'not found')"
+    printf "  %-18s %s\n" "mamba:" "$("$HOME/miniforge3/bin/mamba" --version 2>/dev/null | head -1 || echo 'not found')"
+    printf "  %-18s %s\n" "direnv:" "$(direnv --version 2>/dev/null || echo 'not found')"
+    printf "  %-18s %s\n" "ruff:" "$(ruff --version 2>/dev/null || echo 'not found')"
+    printf "  %-18s %s\n" "basedpyright:" "$(basedpyright --version 2>/dev/null || echo 'not found')"
+    printf "  %-18s %s\n" "just:" "$(just --version 2>/dev/null || echo 'not found')"
+}
+
 # --- Summary -----------------------------------------------------------------
 
 print_summary() {
@@ -602,6 +709,20 @@ main() {
     check_conflicts
     print_summary
     install_missing
+
+    # Post-install: deploy scripts, configure shell, set git defaults
+    deploy_scripts
+    configure_bashrc
+    configure_git_defaults
+    print_version_summary
+
+    echo ""
+    echo -e "${BOLD}${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BOLD}${GREEN}║  Luxus Python Stack — Setup Complete                     ║${NC}"
+    echo -e "${BOLD}${GREEN}╠══════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${BOLD}${GREEN}║${NC}  Scripts: ${BOLD}${INSTALL_DIR}${NC}"
+    echo -e "${BOLD}${GREEN}║${NC}  Next:    ${BOLD}source ~/.bashrc${NC}"
+    echo -e "${BOLD}${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
 }
 
 main "$@"

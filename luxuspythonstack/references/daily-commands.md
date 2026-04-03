@@ -7,7 +7,7 @@ Quick lookup for all common operations. For full documentation, see `luxus-pytho
 ## Level 0 Setup
 
 ```bash
-bash scripts/install_luxuspythonstack.sh
+bash scripts/check-and-install.sh
 source ~/.bashrc
 ```
 

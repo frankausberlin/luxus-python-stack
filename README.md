@@ -44,7 +44,7 @@ The Python stack provides specific <b>tools, rules and best practices</b> for ea
 
 * Document [luxus-python-stack.md](luxuspythonstack/references/luxus-python-stack.md)
 * Document [daily-commands.md](luxuspythonstack/references/daily-commands.md)
-* Script [install_luxuspythonstack.sh](luxuspythonstack/scripts/install_luxuspythonstack.sh)
+* Script [check-and-install.sh](luxuspythonstack/scripts/check-and-install.sh)
 * Script [pyinit.sh](luxuspythonstack/scripts/pyinit.sh)
 
 The canonical bootstrap implementation lives in [pyinit.sh](luxuspythonstack/scripts/pyinit.sh). The long-form stack document links to that script instead of embedding the implementation inline.

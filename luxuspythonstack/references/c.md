@@ -1,3 +1,4 @@
+(1) luxus-python-stack.md
 ## 💎 Luxurious Python Stack
 
 <table width=800><tr></tr><tr><td colspan=5><hr></td></tr><tr><td align=center>
@@ -188,4 +189,368 @@ python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
 # mamba activate $(cat ~/.startenv)
 # act() { [ "$#" -ne 0 ] && echo $1 > .startenv && mamba activate $1; }
 ```
+
+
+
+
+
+
+(2) blueprint-AGENTS.md
+# 🤖 Agent Guide: {{PROJECT_NAME}}
+
+Welcome, AI Agent! You are operating within the **Luxurious Python Stack** (Level 2: Project Environment). This means strict rules apply to dependency management, environment activation, and versioning. Read this document carefully before making any changes.
+
+## 🎯 Project Goal
+{{INSERT_PROJECT_DESCRIPTION_HERE}}
+
+## 🏗️ Architecture & Conventions
+- **Core Logic:** Located in `src/{{PACKAGE_NAME}}/`.
+- **Tests:** Located in `tests/`.
+- **Typing:** Strict type hinting is mandatory. `basedpyright` is the primary type checker.
+- **Docstrings:** Use Google-style docstrings for all public functions and classes.
+- **Import style:** We use `__init__.py` as a facade. External imports should run via the main package.
+
+## 🛠️ Stack & Tooling (CRITICAL RULES)
+This project is strictly managed by `uv`. **Do not use `pip`, `poetry`, or standard `venv` commands.**
+
+1. **Dependencies:** 
+   - Add packages: `uv add <package>`
+   - Add dev tools: `uv add --dev <package>`
+   - Sync environment: `uv sync`
+2. **Execution:** In scripts, automation, and CI, ALWAYS prefix commands with `uv run` to guarantee reproducibility (e.g., `uv run ruff check .`). In an interactive terminal with `direnv`-activated `.venv`, direct commands are acceptable.
+3. **Quality Gate:** Run `just check` — this executes the full gate (lint, format check, type check, tests) in one step. Individual commands if needed:
+     - Linting & Formatting: `uv run ruff check .` / `uv run ruff format --check .`
+     - Auto-fix: `uv run ruff check --fix .` / `uv run ruff format .`
+     - Type Checking: `uv run basedpyright`
+     - Testing: `uv run pytest`
+
+## 🚀 Versioning & Releases
+We use `bump-my-version` for automated semantic versioning.
+- **NEVER** change versions manually in `pyproject.toml` or `__init__.py`. This breaks the CI/CD pipeline!
+- To bump a version, ensure the working tree is clean and run: `just bump patch|minor|major`.
+- Do **not** use `commit_args = "-m ..."` in the config, as it breaks internal commit management.
+
+## 🧑‍💻 The "Vibe Coding" Workflow (Session Lifecycle)
+As an AI Agent, you must adhere to the following session state management:
+
+1. **Initialization:** At the absolute beginning of your task, read `SESSION.md` (if it exists) to understand the context, recent changes, and current roadmap.
+2. **Execution:** Perform your coding tasks, run tests, and ensure `just check` passes without errors.
+3. **Finalization:** Before ending your interaction or completing the task:
+   - **Overwrite** `SESSION.md` with a concise summary of what was just achieved, any open issues, and the immediate next steps (current snapshot — volatile).
+   - **Append** a dated entry to `JOURNAL.md` with a brief summary of what was accomplished (persistent history — never overwrite).
+
+## 🐞 Debugging Protocol (Level 2)
+When encountering errors, test failures, or unexpected behavior, follow this structured debugging approach:
+
+1. **Test-Driven Debugging:** Do not guess. Write or isolate a failing test first.
+   - Run specific tests with stdout enabled: `uv run pytest -k <test_name> -s`
+   - The `-s` flag is crucial so you can read `print()` statements and logs in the terminal output.
+2. **Logging over Printing:** 
+   - This project uses `colorlog` (installed via dev-dependencies).
+   - For complex state tracking, configure a basic logger instead of scattering `print()` statements, as logs provide module context and timestamps.
+3. **Traceback Analysis:**
+   - Always read the FULL traceback. Identify if the error originates from the core logic (`src/`) or a third-party dependency.
+   - If a third-party library throws an error, verify the installed version with `uv pip list` or check the `pyproject.toml`.
+4. **Interactive State (If supported):**
+   - If your agent framework supports interactive code execution, you may use `breakpoint()` (standard `pdb`) to inspect local variables, but ensure you step through or exit properly so the process doesn't hang.
+
+## 🧑‍🔧 Troubleshooting
+- **ModuleNotFoundError:** You probably forgot `uv run` or need to run `uv sync`.
+- **Test Failures:** Prioritize fixing core logic in `src/` over altering the tests, unless the tests are explicitly flawed.
+- **Linting errors:** Run `uv run ruff check --fix .` before attempting manual formatting fixes.
+
+
+
+
+
+
+(3) daily-commands.md
+# Daily Commands Reference — Luxurious Python Stack
+
+Quick lookup for all common operations. For full documentation, see `luxus-python-stack.md`.
+
+---
+
+## Level 0 Setup
+
+```bash
+bash scripts/check-and-install.sh
+source ~/.bashrc
+```
+
+The installer copies scripts to `~/.local/share/luxuspythonstack/`, writes the managed block into `~/.bashrc`, and enables the `direnv` hook. Re-running replaces the block instead of appending.
+
+---
+
+## Project Initialization
+
+```bash
+pyinit                              # app in current directory
+pyinit my-project                   # app in new directory
+pyinit my-lib --lib                 # library in new directory
+pyinit my-project --python 3.11    # specify Python version (default: 3.12)
+pyinit my-project --force          # re-run and overwrite generated files
+```
+
+---
+
+## Environment Management
+
+### Mamba (Level 1 — Data Science)
+```bash
+act <envname>                        # activate + save to ~/.startenv
+mamba activate <envname>             # activate without saving
+mamba deactivate                     # deactivate
+mamba activate base                  # back to base
+jl [folder]                          # start Jupyter Lab (secure, token enabled)
+jl -x [folder]                       # start Jupyter Lab without token (unsafe)
+jl --colab [folder]                  # start Jupyter Lab with Colab origin
+
+# Recreate environment
+py=3.12 && ENV_NAME="ds${py: -2}"
+mamba deactivate
+mamba remove -y -n $ENV_NAME --all 2>/dev/null
+mamba create -y -n $ENV_NAME python=$py <packages...>
+mamba activate $ENV_NAME
+```
+
+### UV/direnv (Level 2 — Project)
+```bash
+# direnv auto-activates .venv when entering directory
+direnv allow          # allow .envrc (run once per project)
+uv sync               # sync environment after git pull / pyproject changes
+```
+
+---
+
+## Dependencies
+
+```bash
+uv add <package>              # add runtime dependency
+uv add --dev <package>        # add dev-only dependency
+uv remove <package>           # remove dependency
+uv sync                       # sync .venv with lock file
+uv pip install <package>      # install directly (Level 1 / Level 3 only)
+```
+
+---
+
+## Ephemeral Tools (uvx)
+
+`uvx` runs a CLI tool in a temporary environment without installing it — perfect for one-off utilities:
+
+```bash
+uvx httpie GET https://api.example.com   # run without installing
+uvx ruff check some_file.py              # use latest ruff without project dependency
+uvx pip-audit                            # audit dependencies for vulnerabilities
+uvx twine check dist/*                   # check package before publishing
+```
+
+> `uvx` is equivalent to `pipx run` but powered by `uv`. The tool is cached locally after first use, so subsequent runs are instant.
+
+---
+
+## Running Code
+
+```bash
+just run                            # run the main script
+uv run python src/<project>/main.py # guaranteed sync (use in scripts/CI)
+uv run <tool> <args>                # run tool from project environment
+```
+
+> **`uv run` vs. `direnv`:** The stack uses `direnv` to auto-activate `.venv`, which makes `uv run` optional in local terminal use. However, `uv run` also triggers a dependency sync if things have changed (e.g., after a `git pull`). Always use `uv run` in scripts, aliases, and CI/CD pipelines to guarantee reproducibility. If module errors arise locally, run `uv sync`.
+
+---
+
+## Testing
+
+```bash
+just test                   # run all tests
+pytest tests/               # run specific directory
+pytest -v                   # verbose output
+pytest -k "test_name"       # run specific test
+pytest --tb=short           # short traceback
+uv run pytest               # guaranteed sync (CI/CD)
+```
+
+---
+
+## Code Quality
+
+```bash
+just lint                   # lint: show errors (ruff + basedpyright)
+just typecheck              # type checking only
+just check                  # lint + typecheck + tests
+just fix                    # lint: auto-fix what's possible (ruff)
+just audit                  # check dependencies for known vulnerabilities
+
+# Manual commands:
+ruff check .                # lint: show errors
+ruff check --fix .          # lint: auto-fix what's possible
+ruff format .               # format code
+uv run basedpyright         # type checking
+uvx pip-audit               # dependency vulnerability scan (no install needed)
+```
+
+---
+
+## Documentation (library projects)
+
+```bash
+just docs-serve         # preview docs locally with live reload
+just docs               # build static docs into site/
+```
+
+Generated by `pyinit --lib`. Uses **MkDocs** + **Material theme** + **mkdocstrings** — the stack auto-generates API reference pages from Google-style docstrings. Edit `docs/` for narrative content; `docs/api.md` auto-renders your public API.
+
+---
+
+## Version & Release
+
+A project exists in two states: **development** (fluid code, static version, relying on dev-dependencies) and **release** (frozen snapshot with an incremented version number and a Git tag marking the exact commit). Releasing requires keeping the version in `pyproject.toml` and Git tags perfectly synchronized — doing this manually is error-prone and can break CI/CD pipelines.
+
+> **Rule:** Never edit the version or create tags manually. `bump-my-version` updates the config, creates a commit, and sets the Git tag in one atomic step.
+
+```bash
+# ALWAYS use bump-my-version (never edit manually, never git tag manually)
+just bump patch                 # 0.2.0 → 0.2.1  (bugfixes)
+just bump minor                 # 0.2.1 → 0.3.0  (new features)
+just bump major                 # 0.3.0 → 1.0.0  (breaking changes)
+
+# Push code AND tags together
+git push origin main --tags
+
+# Build and publish (if not via CI)
+uv build        # creates dist/
+uv publish      # upload to PyPI
+```
+
+---
+
+## CI/CD (GitHub Actions)
+
+```bash
+# In GitHub Actions workflows:
+uv sync --dev               # install all dependencies (uses uv.lock)
+just check                  # full quality gate
+uv build && uv publish      # build and publish (release workflow)
+
+# Releases can also be triggered manually via workflow_dispatch.
+```
+
+---
+
+## Git Workflow
+
+```bash
+# Feature development
+git checkout -b feature/my-feature
+# ... make changes ...
+just check
+git add -A && git commit -m "feat: description" # pre-commit hooks will run
+git push origin feature/my-feature
+
+# Release
+just bump patch
+git push origin main --tags
+
+# After git pull
+uv sync     # always sync after pulling changes
+```
+
+---
+
+## Bash Aliases & Functions
+
+```bash
+# ~/.bashrc functions (already defined if stack is set up):
+pyinit [name] [--lib] [--python X.Y] [--force]  # create project
+act <envname>            # activate mamba env + save to ~/.startenv
+cw                       # cd to saved working folder (global state — one folder per machine)
+cw .                     # save current folder as working folder
+pypurge                  # clean pip, mamba, and uv caches
+rlb                      # source ~/.bashrc (reload)
+```
+
+> **Note on `cw`:** The working folder is stored globally in `~/.config/current_working_folder`. It is shared across all terminals — setting `cw .` in Terminal B overwrites Terminal A's saved folder. For per-session navigation, prefer `cd` with shell history or a terminal multiplexer (tmux).
+
+---
+
+## AI Agent Session Workflow
+
+### Session Start
+```bash
+# 1. Read project context
+cat AGENTS.md
+
+# 2. Read last session summary (if exists)
+cat SESSION.md 2>/dev/null || echo "No previous session"
+
+# 3. Sync environment
+uv sync
+
+# 4. Check project status
+git status
+git log --oneline -5
+```
+
+### Session End
+```bash
+# 1. Run quality checks
+just check
+
+# 2. Commit all changes
+git add -A && git commit -m "chore: end of session" # pre-commit hooks will run
+
+# 3. Overwrite SESSION.md with current state (volatile — not tracked by git)
+cat > SESSION.md << 'SESSION_EOF'
+# Session Summary — $(date +%Y-%m-%d)
+
+## What was accomplished
+- ...
+
+## Current state
+- ...
+
+## Next steps
+- ...
+SESSION_EOF
+
+# 4. Append a dated entry to JOURNAL.md (append-only history — not tracked by git)
+cat >> JOURNAL.md << 'JOURNAL_EOF'
+
+## $(date +%Y-%m-%d) — Session Notes
+- ...
+JOURNAL_EOF
+```
+
+> **SESSION.md vs JOURNAL.md:** Both are in `.gitignore`. `SESSION.md` is overwritten each session with current state. `JOURNAL.md` is append-only and preserves historical context across sessions.
+
+---
+
+## Navigation
+
+```bash
+cw .          # set current dir as working folder
+cw            # cd to saved working folder
+```
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Modules not found after `git pull` | `uv sync` |
+| Wrong Python version in project | `uv python pin 3.12` |
+| direnv not activating | `direnv allow` |
+| Mamba env conflicts | `mamba clean --all` or recreate env |
+| Type errors | Check `basedpyright` output |
+| Lint errors | `just fix` |
+| bump-my-version fails | Ensure clean git state (`git status`) |
+| Can't publish to PyPI | Check `uv publish --token <token>` |
+
+
+
+
 
