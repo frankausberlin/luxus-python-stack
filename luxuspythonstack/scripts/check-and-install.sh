@@ -62,6 +62,8 @@ declare -a REQUIRED_TOOLS=(
 declare -a RECOMMENDED_TOOLS=(
     "rg|rg --version"
     "fd|fd --version"
+    "shellcheck|shellcheck --version"
+    "shfmt|shfmt --version"
     "build-essential|dpkg -s build-essential &>/dev/null"
 )
 
@@ -300,6 +302,25 @@ install_curl() {
 
 install_direnv() {
     install_packages "direnv"
+}
+
+install_shellcheck() {
+    install_packages "shellcheck"
+}
+
+install_shfmt() {
+    # shfmt is available as a snap or via direct download; prefer apt on Ubuntu 22.04+
+    if install_packages "shfmt" 2>/dev/null; then
+        return 0
+    fi
+    # Fallback: install via snap
+    if command -v snap &>/dev/null; then
+        echo -e "${YELLOW}⚠️  shfmt not in apt — trying snap${NC}"
+        sudo snap install shfmt && ((INSTALLED_COUNT++)) || true
+    else
+        echo -e "${YELLOW}⚠️  Install shfmt manually: https://github.com/mvdan/sh/releases${NC}"
+        return 1
+    fi
 }
 
 install_build_essential() {

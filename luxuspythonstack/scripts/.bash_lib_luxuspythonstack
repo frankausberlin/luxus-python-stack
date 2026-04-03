@@ -24,7 +24,7 @@ cw() {
 }
 
 alias rlb="source ~/.bashrc"
-alias pypurge='pip cache purge; mamba clean --all'
+alias pypurge='python -m pip cache purge; mamba clean --all -y; uv cache clean'
 
 # act: activate a Mamba environment and persist it for new shells
 act() {

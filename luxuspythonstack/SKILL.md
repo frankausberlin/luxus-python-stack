@@ -48,31 +48,37 @@ Need to release?
 
 ### 1. Initialize a New Python Project
 
-To create a new project, use the bundled [`scripts/pyinit.sh`](scripts/pyinit.sh) script:
+To create a new project, use the bundled [`scripts/pyinit.sh`](scripts/pyinit.sh) script (or the `pyinit` shell function):
 
 ```bash
-# App project in current directory
-bash scripts/pyinit.sh
-
-# App project in a new directory
-bash scripts/pyinit.sh my-project
-
-# Library project
-bash scripts/pyinit.sh my-lib --lib
+pyinit                              # app in current directory
+pyinit my-project                   # app in new directory
+pyinit my-lib --lib                 # library in new directory
+pyinit my-project --python 3.11    # specify Python version (default: 3.12)
+pyinit my-project --force          # re-run and overwrite generated files (idempotent)
 ```
 
 The script creates:
-- `src/<project>/` structure
-- `pyproject.toml` with UV configuration
-- `.venv/` virtual environment (Python 3.12)
+- `src/<project>/` structure with `__init__.py`, `main.py` (app), or `py.typed` (lib)
+- `tests/` with `__init__.py`, `conftest.py`, `test_placeholder.py`
+- `pyproject.toml` with ruff, basedpyright, pytest, and bump-my-version config
+- `.venv/` virtual environment (Python 3.12 by default)
 - `.python-version` pin
-- `.vscode/settings.json` with Ruff formatter
-- `.envrc` for direnv auto-activation
-- `.gitignore` (from gitignore.io)
-- `bump-my-version` config in `pyproject.toml`
+- `.vscode/settings.json`, `launch.json`, and `extensions.json`
+- `.envrc` for direnv auto-activation (with Conda deactivation guard)
+- `.gitignore` (from gitignore.io + VS Code whitelist)
+- `.editorconfig` for cross-editor and cross-agent consistency
 - Dev dependencies: `ruff pytest pytest-cov basedpyright colorlog bump-my-version pre-commit`
-- `Justfile` for task running
-- `.pre-commit-config.yaml` for local quality checks
+- `Justfile` for task running (bump recipe enforces clean working tree; `audit` recipe for vulnerability scanning)
+- `.pre-commit-config.yaml` for local quality checks (ruff only, no basedpyright)
+- `.github/workflows/ci.yml` and `release.yml` (Level 3; CI includes `pip-audit` security scan)
+- `AGENTS.md` generated from `blueprint-AGENTS.md` (Level 4)
+- `README.md` with getting started instructions
+- `CONTRIBUTING.md` for human developer onboarding
+- `LICENSE` (MIT, year auto-detected, author from git config)
+- **Library projects only:** `mkdocs.yml` + `docs/` with Material theme and mkdocstrings (auto-generates API docs from Google-style docstrings)
+
+**Idempotency:** Re-running without `--force` skips files that already exist. Use `--force` to regenerate all generated files.
 
 After running pyinit, activate the environment:
 ```bash
@@ -127,6 +133,13 @@ just lint                 # lint: find errors (ruff + basedpyright)
 just typecheck            # type check with basedpyright
 just check                # full local quality gate
 just fix                  # lint: auto-fix (ruff)
+just audit                # security: scan dependencies for vulnerabilities
+```
+
+**Documentation** (library projects only):
+```bash
+just docs-serve           # local preview with live reload (http://127.0.0.1:8000)
+just docs                 # build static site into site/
 ```
 
 ### 4. Release & Deployment
@@ -164,20 +177,26 @@ Every repository using this stack includes two special files:
 - Read this at the start of every agent session
 
 **`SESSION.md`** (NOT tracked — in `.gitignore`):
-- Volatile session memory: summary of the last agent session
-- Recreate at the end of each session with: what was done, current state, next steps
+- Volatile session memory: current state snapshot
+- **Overwrite** at the end of each session with: what was done, current state, next steps
 - Read at session start to restore context
+
+**`JOURNAL.md`** (NOT tracked — in `.gitignore`):
+- Append-only history of all sessions with dated entries
+- **Never overwrite** — only append a new dated entry at session end
+- Provides debugging context if an agent goes down a wrong path
 
 **Session start workflow**:
 1. Read `AGENTS.md` for project context
-2. Read `SESSION.md` if it exists (last session summary)
+2. Read `SESSION.md` if it exists (last session snapshot)
 3. Run `uv sync` to ensure environment is current
 4. Begin work
 
 **Session end workflow**:
 1. Run the local quality gate: `just check`
-2. Write/update `SESSION.md` with session summary
-3. Commit all changes (pre-commit hooks will run automatically)
+2. Commit all changes (pre-commit hooks will run automatically)
+3. **Overwrite** `SESSION.md` with current state summary
+4. **Append** a dated entry to `JOURNAL.md`
 
 ## Key Shell Functions
 
@@ -185,10 +204,10 @@ These are bash functions defined in `.bashrc` — use them as commands:
 
 | Function | Usage | Description |
 |----------|-------|-------------|
-| `pyinit` | `pyinit [name] [--lib]` | Create a new Python project |
+| `pyinit` | `pyinit [name] [--lib] [--python X.Y] [--force]` | Create a new Python project |
 | `act` | `act <envname>` | Activate Mamba env + save to `.startenv` |
-| `jl` | `jl [-x] [folder]` | Start Jupyter Lab with optional token-enabled mode |
-| `cw` | `cw` / `cw .` | Jump to / set working folder |
+| `jl` | `jl [-x] [--colab] [folder]` | Start Jupyter Lab (token on by default) |
+| `cw` | `cw` / `cw .` | Jump to / set working folder (**global** — shared across all terminals) |
 | `pypurge` | `pypurge` | Clean pip cache + Mamba environment |
 
 ## Important Notes
@@ -197,7 +216,7 @@ These are bash functions defined in `.bashrc` — use them as commands:
 
 2. **Never mix uv packages into Mamba**: In Level 1 (Mamba), `uv pip install` is used instead of `mamba install` for faster installs, but this means those packages aren't under Mamba's control. This is intentional — the data science environment is disposable and rebuilt regularly.
 
-3. **Version bumping**: Never edit `version =` in `pyproject.toml` manually. Never `git tag` manually. Always use `bump-my-version`.
+3. **Version bumping**: Never edit `version =` in `pyproject.toml` or `__init__.py` manually. Never `git tag` manually. Always use `just bump [patch|minor|major]`. The `bump` recipe enforces a clean working tree — commit all changes first.
 
 4. **direnv**: If auto-activation isn't working, run `direnv allow` in the project directory.
 

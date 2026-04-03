@@ -1,0 +1,70 @@
+# Data Science Environment — Luxurious Python Stack
+#
+# Usage (inside an active Mamba environment):
+#   uv pip install -r requirements-ds.txt --extra-index-url https://download.pytorch.org/whl/cu126
+#
+# To recreate the environment from scratch:
+#   py=3.12 && ENV_NAME="ds${py: -2}"
+#   mamba deactivate
+#   mamba remove -y -n $ENV_NAME --all 2>/dev/null
+#   mamba create -y -n $ENV_NAME python=$py google-colab
+#   mamba activate $ENV_NAME
+#   uv pip install -r requirements-ds.txt --extra-index-url https://download.pytorch.org/whl/cu126
+#   jupyter labextension enable jupyter_http_over_ws
+#   python -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
+#   echo $ENV_NAME > ~/.startenv
+#
+# Update these pins periodically, then test before committing.
+# Adjust CUDA index URL for your GPU (cu126 = CUDA 12.6).
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+jupyterlab
+jupytext
+jupyter_http_over_ws
+jupyter-ai
+jupyterlab-github
+ipywidgets==7.7.1
+xeus-python
+
+# ── Deep Learning ─────────────────────────────────────────────────────────────
+torch
+torchvision
+tensorflow
+tf-keras
+jax
+fastai
+
+# ── ML / Data Science ─────────────────────────────────────────────────────────
+scikit-learn
+numba
+datasets
+evaluate
+accelerate
+transformers
+huggingface-hub
+
+# ── LLM / Agents ──────────────────────────────────────────────────────────────
+langchain
+langchain-openai
+langchain-ollama
+llama-index
+mcp
+
+# ── NLP ───────────────────────────────────────────────────────────────────────
+nltk
+rouge_score
+
+# ── Computer Vision / Audio ───────────────────────────────────────────────────
+opencv-python
+soundfile
+
+# ── Document Handling ─────────────────────────────────────────────────────────
+unstructured[all-docs]
+PyPDF2
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+graphviz
+nbdev
+setuptools
+wheel
+colorlog

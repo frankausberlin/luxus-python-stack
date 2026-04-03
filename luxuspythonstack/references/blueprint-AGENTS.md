@@ -20,11 +20,11 @@ This project is strictly managed by `uv`. **Do not use `pip`, `poetry`, or stand
    - Add dev tools: `uv add --dev <package>`
    - Sync environment: `uv sync`
 2. **Execution:** In scripts, automation, and CI, ALWAYS prefix commands with `uv run` to guarantee reproducibility (e.g., `uv run ruff check .`). In an interactive terminal with `direnv`-activated `.venv`, direct commands are acceptable.
-3. **Quality Gate:** 
-     - Linting & Formatting: `uv run ruff check .` and `uv run ruff check --fix .`
+3. **Quality Gate:** Run `just check` — this executes the full gate (lint, format check, type check, tests) in one step. Individual commands if needed:
+     - Linting & Formatting: `uv run ruff check .` / `uv run ruff format --check .`
+     - Auto-fix: `uv run ruff check --fix .` / `uv run ruff format .`
      - Type Checking: `uv run basedpyright`
      - Testing: `uv run pytest`
-    - Unified gate: `just check`
 
 ## 🚀 Versioning & Releases
 We use `bump-my-version` for automated semantic versioning.
@@ -37,7 +37,9 @@ As an AI Agent, you must adhere to the following session state management:
 
 1. **Initialization:** At the absolute beginning of your task, read `SESSION.md` (if it exists) to understand the context, recent changes, and current roadmap.
 2. **Execution:** Perform your coding tasks, run tests, and ensure `just check` passes without errors.
-3. **Finalization:** Before ending your interaction or completing the task, **overwrite** `SESSION.md` with a concise summary of what was just achieved, any open issues, and the immediate next steps.
+3. **Finalization:** Before ending your interaction or completing the task:
+   - **Overwrite** `SESSION.md` with a concise summary of what was just achieved, any open issues, and the immediate next steps (current snapshot — volatile).
+   - **Append** a dated entry to `JOURNAL.md` with a brief summary of what was accomplished (persistent history — never overwrite).
 
 ## 🐞 Debugging Protocol (Level 2)
 When encountering errors, test failures, or unexpected behavior, follow this structured debugging approach:
