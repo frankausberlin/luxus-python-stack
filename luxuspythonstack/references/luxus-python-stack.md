@@ -173,21 +173,19 @@ shfmt -w luxuspythonstack/scripts/*.sh   # write mode: apply formatting
 
 ### Data Science Environment (example)
 
-The full list of data-science packages is tracked in [`requirements-ds.txt`](requirements-ds.txt). This makes it diffable, updatable, and allows selective installs — instead of a fragile unmaintainable one-liner.
-
 ```shell
-# (Re)create a data science environment with all the goodies and activate it
-py=3.12 && ENV_NAME="ds${py: -2}"   # python 3.XY --> 'dsXY'
-mamba deactivate
-mamba remove -y -n $ENV_NAME --all 2>/dev/null
-mamba create -y -n $ENV_NAME python=$py google-colab
-mamba activate $ENV_NAME
-
-# Install packages from the pinned requirements file
-uv pip install -r requirements-ds.txt \
-    --extra-index-url https://download.pytorch.org/whl/cu126   # adjust for your CUDA version
-
-jupyter labextension enable jupyter_http_over_ws
-python -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
-echo $ENV_NAME > ~/.startenv
+#                     (re)create a data science environment with all the goodies and activate it
+# _________________________________________________________________________________________________________________________________
+py=3.12 && ENV_NAME="ds${py: -2}" && mamba deactivate && mamba remove -y -n $ENV_NAME --all 2>/dev/null # python 3.XY --> 'dsXY'
+mamba   create -y -n $ENV_NAME python=$py google-colab && mamba activate $ENV_NAME # testet with python 3.11/12/13
+uv pip  install torch torchvision scikit-learn jax jupyterlab jupytext jupyter_http_over_ws jupyter-ai jupyterlab-github fastai\
+        numba langchain langchain-openai langchain-ollama transformers evaluate accelerate nltk tf-keras hrid huggingface-hub\
+        rouge_score datasets unstructured[all-docs] opencv-python soundfile nbdev llama-index tensorflow setuptools wheel mcp\
+        graphviz PyPDF2 xeus-python ipywidgets==7.7.1 --extra-index-url https://download.pytorch.org/whl/cu126 # use your cuda
+jupyter labextension enable jupyter_http_over_ws && echo $ENV_NAME > ~/.startenv
+python  -m ipykernel install --user --name $ENV_NAME --display-name $ENV_NAME
+# _____________________________insert_in_.bashrc_and_use_'act'_instead_of_'mamba_activate'_________________________________________
+# mamba activate $(cat ~/.startenv)
+# act() { [ "$#" -ne 0 ] && echo $1 > .startenv && mamba activate $1; }
 ```
+
