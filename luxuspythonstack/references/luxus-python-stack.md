@@ -11,7 +11,7 @@
 🧱 Level 2<br><br>Projects <br> .venv
 </td><td align=center>
 
-🧱 Level 3<br><br>CI <br> Deployment
+🧱 Level 3<br><br>CI/CD <br> pyproject.toml
 </td><td align=center>
 
 🧱 Level 4<br><br>AI Agents <br> Vibe Coding
