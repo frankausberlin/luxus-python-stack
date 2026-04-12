@@ -8,13 +8,13 @@
 🧱 Level 1<br><br>Mamba <br> Jupyter
 </td><td align=center>
 
-🧱 Level 2<br><br>Projects <br> .venv
+🧱 Level 2<br><br>Projects <br> pyproject.toml
 </td><td align=center>
 
-🧱 Level 3<br><br>CI/CD <br> pyproject.toml
+🧱 Level 3<br><br>CI/CD <br> Justfile
 </td><td align=center>
 
-🧱 Level 4<br><br>AI Agents <br> Vibe Coding
+🧱 Level 4<br><br>AI Agents <br> SKILL.md
 </td></tr><tr><td colspan=5><hr></td></tr></table>
 
 The luxurious Python stack is a combination of tools, scripts, aliases, and rules that allows me to work efficiently and flexibly with Python. By dividing it into different layers, I can ensure that I always have the right environment for my projects or data science work, without any conflicts arising.
