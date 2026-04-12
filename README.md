@@ -21,6 +21,8 @@ This is my personal Python stack that I use for <b>project development, data sci
 
 The Python stack provides specific <b>tools, rules and best practices</b> for each level. The complete stack is contained in the documents <b>luxus-python-stack.md</b> and <b>daily-commands.md</b> and is located in the <b>references</b> directory of the <b>agent skill</b>.
 
+The stack also contains the description of a complete Linux system. The Linux base system setup instructions are described in the reference <b>basesystem.md</b>. This is the basis for the Python stack environment.
+
 
 ## Content
 
@@ -28,6 +30,7 @@ The Python stack provides specific <b>tools, rules and best practices</b> for ea
 ```
 ├── luxuspythonstack                     # Skill-Folder
 │   ├── references                       # References for the agent skill
+│   │   ├── basesystem.md                # Linux Base system setup
 │   │   ├── blueprint-AGENTS.md          # Blueprint for the AGENTS.md
 │   │   ├── daily-commands.md            # For the daily workflow and commands
 │   │   └── luxus-python-stack.md        # The complete Python stack

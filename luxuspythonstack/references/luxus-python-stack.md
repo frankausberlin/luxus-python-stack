@@ -1,4 +1,4 @@
-## 💎 Luxurious Python Stack
+# 💎 Luxurious Python Stack
 
 <table width=800><tr></tr><tr><td colspan=5><hr></td></tr><tr><td align=center>
 
@@ -34,7 +34,7 @@ Scripts and Aliases (.bash_lib_luxuspythonstack):
 - **jl**: Starts Jupyter Lab securely (token enabled by default) in a default folder or specified folder. Use `jl -x [<folder>]` to disable the token (unsafe). Use `jl --colab [<folder>]` to allow Google Colab origin.
 
 
-### Five-level concept
+## Five-level concept
 
 My workflow is based on a five-level concept:
 
@@ -95,7 +95,7 @@ My workflow is based on a five-level concept:
 * **Coding Agents**: There are a lot of good ones. I personally like Kilo Code (VS Code Extension) and Open Code. But Claude, Gemini cli, Mistral Vibe, Codex are also recommended. They work directly with the Mcphub and the LuxusPythonStack skill.
 
 
-### Installation
+## Installation
 
 * Run `bash scripts/check-and-install.sh` to install the Level 0 tooling and wire your shell setup.
 * The installer **copies** the shell library and scripts to `~/.local/share/luxuspythonstack/`, so the stack remains functional even if the source repository is moved or deleted.
@@ -103,7 +103,7 @@ My workflow is based on a five-level concept:
 * The startup block is failure-tolerant: if `mamba` is unavailable or `~/.startenv` contains a missing environment, the shell opens normally instead of erroring.
 * Reload the shell afterwards with `source ~/.bashrc`.
 
-### Tool Version Precedence
+## Tool Version Precedence
 
 `ruff` and `basedpyright` are installed both globally via `uv tool install` (for convenience in ad-hoc use) and as per-project dev dependencies in each project's `pyproject.toml`.
 
@@ -111,7 +111,7 @@ My workflow is based on a five-level concept:
 
 **Best practice:** Always use `uv run ruff ...` and `uv run basedpyright ...` in scripts, CI, and automation. This guarantees the project-pinned version runs regardless of PATH order or which environment is active.
 
-### Documentation Generation (Library Projects)
+## Documentation Generation (Library Projects)
 
 For library projects (`pyinit --lib`), the stack scaffolds a complete documentation site using the state-of-the-art Python documentation toolchain:
 
@@ -133,7 +133,7 @@ just docs-serve   # live preview at http://127.0.0.1:8000
 just docs         # build static site into site/
 ```
 
-### Shell Quality
+## Shell Quality
 
 The stack's Python quality story is backed by `ruff`, `basedpyright`, and `pytest`. The shell scripts themselves get the same treatment:
 
@@ -148,17 +148,17 @@ shfmt -d luxuspythonstack/scripts/*.sh   # diff mode: show formatting changes
 shfmt -w luxuspythonstack/scripts/*.sh   # write mode: apply formatting
 ```
 
-### System Requirements
+## System Requirements
 
 > **Platform:** This stack is designed for **Linux (Debian/Ubuntu)**. macOS and other distributions may require manual adaptation of the installer. The `check-and-install.sh` script detects the platform and shows equivalent manual commands for non-apt systems.
 
-### References
+## References
 
 * **blueprint-AGENTS.md** - A blueprint for creating AGENTS.md so that the AI ​​agent can work with the project using the Luxus Python stack. 
 * **daily-commands.md** - A reference for all the daily commands and their purpose.
   
 
-### Scripts
+## Scripts
 
 *All scripts are located in the `scripts` folder of the skill.*
 
@@ -167,7 +167,7 @@ shfmt -w luxuspythonstack/scripts/*.sh   # write mode: apply formatting
 * **pyinit.sh** - A script to initialize a new Python project with a standard structure for the Luxus Python Stack.
 * **launch_jupyter.sh** - A script to start Jupyter Lab.
 
-### Data Science Environment (example)
+## Data Science Environment (example)
 
 ```shell
 #                     (re)create a data science environment with all the goodies and activate it
