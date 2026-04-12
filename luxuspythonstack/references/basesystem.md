@@ -4,6 +4,7 @@
 
 **Tools, Libs, ssh, Cuda, Docker, Git, SearXng**
 
+
 ### ⚠️ Package Manager Policy:
 
 * apt/nala  -> System packages, dev tools, CLI utilities
@@ -55,21 +56,19 @@ brew install yazi font-symbols-only-nerd-font lazyjournal lazydocker
 
 # optional gnome extensions
 gsettings set org.gnome.shell disable-extension-version-validation true # for new ubuntu's
-xdg-open https://extensions.gnome.org/extension/1653/tweaks-in-system-menu/
-xdg-open https://extensions.gnome.org/extension/4548/tactile/
-xdg-open https://extensions.gnome.org/extension/1319/gsconnect/
+# xdg-open https://extensions.gnome.org/extension/1653/tweaks-in-system-menu/
+# xdg-open https://extensions.gnome.org/extension/4548/tactile/
+# xdg-open https://extensions.gnome.org/extension/1319/gsconnect/
 
 # optional embellishments
 # Damask wallpaper (nasa api-key: https://api.nasa.gov/)
-xdg-open https://flathub.org/de/apps/app.drey.Damask
+# xdg-open https://flathub.org/de/apps/app.drey.Damask
 
 # Fallout theme for grub (download first, review, then execute - don't pipe directly to bash)
 # sudo nano /etc/default/grub -> GRUB_TIMEOUT_STYLE=menu, GRUB_TIMEOUT=5, GRUB_GFXMODE=1920x1080,auto
 wget https://github.com/shvchk/fallout-grub-theme/raw/master/install.sh -O /tmp/fallout-grub-install.sh
 bash /tmp/fallout-grub-install.sh
-
 ```
-
 
 ### 2. 🔒 SSH, UFW & Co.
 
@@ -115,7 +114,6 @@ bantime = 3600
 EOF
 sudo systemctl restart fail2ban
 ```
-
 
 ### 3. 🚀 Docker & CUDA Toolkit
 
@@ -186,7 +184,6 @@ sudo systemctl restart docker
 sudo docker run --rm --gpus all ubuntu nvidia-smi
 ```
 
-
 ### 4. 🚀 Github & SearXng
 
 * Github:
@@ -217,7 +214,6 @@ docker run --name searxng -d --restart always -p 8808:8080 \
     - html
     - json
 ```
-
 
 ### 5. 🧿 ZSH & Antidote
 ```shell
