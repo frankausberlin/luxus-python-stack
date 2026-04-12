@@ -90,8 +90,8 @@ My workflow is based on a five-level concept:
 * **Mcphub** is on [Github repo](https://github.com/samanhappy/mcphub) and provides a unified API for different MCP servers (uvx, npx, docker, etc.). 
   - Offers various interface types: Stdio, SSE, Open Api
   - Bearer authentication and OAuth support
-  - Smart routing with your own embedding model (ollama)
-* **Ollama** is used to perform light machine learning tasks such as embedding (mcphub, codebase indexing), image description (RAG), Whisper, OCR, etc.
+  - Easy handling and monitoring, install from Market.
+* **Ollama** is used to perform light machine learning tasks such as embedding (reranking, codebase indexing), image description (RAG), Whisper, OCR, etc.
 * **Coding Agents**: There are a lot of good ones. I personally like Kilo Code (VS Code Extension) and Open Code. But Claude, Gemini cli, Mistral Vibe, Codex are also recommended. They work directly with the Mcphub and the LuxusPythonStack skill.
 
 
