@@ -13,7 +13,7 @@ This is my personal Python stack that I use for <b>project development, data sci
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🧱 Level 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>Projects <br> .venv
 </td><td align=center>
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🧱 Level 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>CI <br> Deployment
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🧱 Level 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>Continuous Integration<br>Continuous Deployment
 </td><td align=center>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🧱 Level 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>AI Agents <br> Vibe Coding

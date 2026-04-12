@@ -17,7 +17,7 @@
 🧱 Level 4<br><br>AI Agents <br> Vibe Coding
 </td></tr><tr><td colspan=5><hr></td></tr></table>
 
-Ultimately, it is a combination of tools, scripts and aliases that allow me to work efficiently and flexibly with Python. By separating it into different levels, I can ensure that I always have the right environment for my projects without causing conflicts between different projects or Python environments.
+The luxurious Python stack is a combination of tools, scripts, aliases, and rules that allows me to work efficiently and flexibly with Python. By dividing it into different layers, I can ensure that I always have the right environment for my projects or data science work, without any conflicts arising.
 
 Tools (check-and-install.sh):
 - **Mamba**: A fast and efficient package manager that allows me to create and manage Python environments easily.
@@ -40,20 +40,26 @@ My workflow is based on a five-level concept:
 
 0. **Global / System Level**
 
-* The standard Python is available here (/usr/bin/python).
-* Core bootstrap tools such as python3, git, curl and direnv are installed by the installer.
-* Miniforge/Mamba, UV, just, ruff and basedpyright are then installed on top and wired into the shell.
-* Tools like rg, fd or build essentials are recommended extras, but are not currently installed by the bootstrap script.
+* The standard Python installation is available here (/usr/bin/python).
+* Core tools such as Python 3, Git and Curl are installed by the installer.
+* Python tools such as Miniforge/Mamba, UV, Just, Ruff and Basedpyright are also installed; Mamba is still inactive.
+* Tools such as rg, fd, or build essentials are recommended extras but are not currently installed.
 * The system level is automatically active as soon as no other environment is activated.
 
 1. **Mamba Level**
 
-* This level is for data science work and is set up using Mamba.
-* It includes tools like Jupyter Lab, pytorch, tensorflow, scikit-learn, and other data science libraries.
-* This level is always active if there is no .venv folder in the current location or you deactivate it.
-* Using `act` to activate an environment will automatically activate it in new terminals (.startenv).
-* An essential tool is Jupyter Lab (experiments, notes, prototypes). It is started with the script `jl`: `jl [-x] [--colab] [<folder>]`. Token is enabled by default; use `-x` to disable (unsafe).
-* This level is highly volatile. The rule applies: **no updates, just delete and recreate**. This is the only way to eliminate the dependency conflicts that can occur when using uv in a Mamba environment.
+* This level is intended for data science work and is set up with Mamba and UV.
+* It includes tools such as Jupyter Lab, PyTorch, TensorFlow, Scikit-Learn, and other data science libraries.
+* This level is always active unless a .venv folder exists at the current location or you disable it.
+* If you use "act" to activate an environment, it will be automatically activated in new terminals (.startenv).
+* A key tool is Jupyter Lab (experiments, notes, prototypes). It is started with the script "jl": "jl [-x] [--colab] [<folder>]". The token is enabled by default; use "-x" to disable it (unsafe).
+* This level is very volatile. The rule is: **no updates, just delete and recreate**. Only in this way can the dependency conflicts that can occur when using uv in a Mamba environment be eliminated.
+
+> ⚠️ **Important Note Regarding the "Mamba Level":**<br>
+> * <b><font color=blue>It doesn't necessarily have to be data science. Any domain is possible here;</font></b> it just happens to be mine.<br>
+> * It's generally not recommended to use `uv` in a Mamba environment, as the packages installed this way are not under Mamba's control. This can lead to conflicts when updating packages with Mamba.<br>
+> * I use the data science environment in a way that makes this problem irrelevant. I'm constantly installing new libraries, deleting old ones, and experimenting. But just as frequently (sometimes twice a day), I completely wipe the environment (reinstall it).
+> * That's why I use `uv`; it's so incredibly fast.
 
 2. **Project / .venv Level**
 
@@ -70,7 +76,6 @@ My workflow is based on a five-level concept:
 * Continuous Integration (CI): On every push or Pull Request, automated workflows run the identical code quality checks used locally through `just check`. Code that fails here cannot be merged.
 * Release Automation: Versioning and Git tagging are fully automated to prevent human error. `bump-my-version` should use `message = "..."` in the configuration and must not use `commit_args = "-m ..."`.
 * Automated building and publishing to PyPI via uv build and uv publish.
-
 
 4. **AI Agents / Vibe Coding Level**
 
@@ -89,15 +94,6 @@ My workflow is based on a five-level concept:
 * **Ollama** is used to perform light machine learning tasks such as embedding (mcphub, codebase indexing), image description (RAG), Whisper, OCR, etc.
 * **Coding Agents**: There are a lot of good ones. I personally like Kilo Code (VS Code Extension) and Open Code. But Claude, Gemini cli, Mistral Vibe, Codex are also recommended. They work directly with the Mcphub and the LuxusPythonStack skill.
 
-⚠️ **Important Note Regarding the "Mamba Level":**<br>
-> <b><font color=blue>It doesn't necessarily have to be data science. Any domain is possible here;</font></b> it just happens to be mine.<br>
-> It's generally not recommended to use `uv` in a Mamba environment, as the packages installed this way are not under Mamba's control. This can lead to conflicts when updating packages with Mamba.<br>
-> I use the data science environment in a way that makes this problem irrelevant. I'm constantly installing new libraries, deleting old ones, and experimenting. But just as frequently (sometimes twice a day), I completely wipe the environment (reinstall it).
-
-```shell
-mamba deactivate && mamba remove -y -n <envname> --all && mamba create -y -n <envname> ...
-```
-> That's why I use `uv`; it's so incredibly fast.
 
 ### Installation
 
